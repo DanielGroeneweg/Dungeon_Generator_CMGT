@@ -14,9 +14,13 @@ public class DungeonGenerator : MonoBehaviour
     [Header("Room Stats")]
     [SerializeField] private int roomMinWidth = 100;
     [SerializeField] private int roomMinHeight = 100;
+    [SerializeField] private int wallBuffer = 2;
+
+    [Header("Door Stats")]
+    [SerializeField] private int doorSize = 6;
 
     [Header("Generation Stats")]
-    [SerializeField] private int minimumAmountOfRooms = 10;
+    [SerializeField] private int minimumAmountOfRooms = 5;
     [SerializeField] private int splitAmount = 10;
     [SerializeField][Range(0f, 1f)] private float ChanceToSplitRoom = 0.5f;
     [SerializeField] private int minRoomsToBeRemoved = 5;
@@ -24,6 +28,7 @@ public class DungeonGenerator : MonoBehaviour
 
     [Header("Rooms")]
     [SerializeField] private List<RectInt> rooms;
+    [SerializeField] private List<RectInt> doors;
 
     // Not in inspector
     private RectInt dungeon;
@@ -35,6 +40,7 @@ public class DungeonGenerator : MonoBehaviour
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonLength);
         rooms = new List<RectInt>();
         removedRooms = new List<RectInt>();
+        doors = new List<RectInt>();
     }
     #region RoomSplitting
     private void SplitRooms()
@@ -72,15 +78,16 @@ public class DungeonGenerator : MonoBehaviour
         int randomSize = Random.Range(roomMinHeight, room.height - roomMinHeight + 1);
         int restSize = room.height - randomSize;
 
-        RectInt roomTop = new RectInt(room.x, room.y + randomSize, room.width, restSize);
+        randomSize += wallBuffer;
+        restSize += wallBuffer;
+
+        RectInt roomTop = new RectInt(room.x, room.y + randomSize - wallBuffer * 2, room.width, restSize);
         RectInt roomBottom = new RectInt(room.x, room.y, room.width, randomSize);
 
         rooms.Add(roomTop);
         rooms.Add(roomBottom);
 
         rooms.Remove(room);
-
-        Debug.Log("Room Height " + room.height + " Random Size " + randomSize + " Rest Size " + restSize);
     }
     // Split room vertically (reduce the x/width)
     private void SplitVertically(RectInt room)
@@ -88,19 +95,20 @@ public class DungeonGenerator : MonoBehaviour
         int randomSize = Random.Range(roomMinWidth, room.width - roomMinWidth + 1);
         int restSize = room.width - randomSize;
 
+        randomSize += wallBuffer;
+        restSize += wallBuffer;
+
         RectInt roomLeft = new RectInt(room.x, room.y, randomSize, room.height);
-        RectInt roomRight = new RectInt(room.x + randomSize, room.y, restSize, room.height);
+        RectInt roomRight = new RectInt(room.x + randomSize - wallBuffer * 2, room.y, restSize, room.height);
 
         rooms.Add(roomLeft);
         rooms.Add(roomRight);
 
         rooms.Remove(room);
-
-        Debug.Log("Room Width " + room.width + " Random Size " + randomSize + " Rest Size " + restSize);
     }
     #endregion
 
-    #region RoomRemoving
+    #region RandomRoomRemoving
     private void RemoveRandomRooms()
     {
         // Pick a random amount of rooms to be removed that lies between the minimum to be removed and maximum to be removed
@@ -108,12 +116,43 @@ public class DungeonGenerator : MonoBehaviour
         for (int i = 1; i <= toBeDestroyed; i++)
         {
             // Make sure there is always at least 1 room
-            if (rooms.Count > 1)
+            if (rooms.Count > minimumAmountOfRooms)
             {
                 // Pick a random room and remove it
                 int index = Random.Range(0, rooms.Count);
                 removedRooms.Add(rooms[index]);
                 rooms.RemoveAt(index);
+            }
+        }
+    }
+    #endregion
+
+    #region DoorGenerating
+    private void GenerateDoors()
+    {
+        // For each room, check for each other room if they overlap
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            for (int j = i + 1; j < rooms.Count; j++)
+            {
+                if (AlgorithmsUtils.Intersects(rooms[i], rooms[j]))
+                {
+                    RectInt intersection = AlgorithmsUtils.Intersect(rooms[i], rooms[j]);
+                    if (intersection.width > intersection.height)
+                    {
+                        if (intersection.width >= wallBuffer * 4 + doorSize)
+                        {
+                            int pos = Random.Range(intersection.xMin + wallBuffer * 2, intersection.xMax - wallBuffer * 2 - doorSize + 1);
+                            doors.Add(new RectInt(pos, intersection.y, doorSize, intersection.height));
+                        }
+                    }
+
+                    else if (intersection.height >= wallBuffer * 4 + doorSize)
+                    {
+                        int pos = Random.Range(intersection.yMin + wallBuffer * 2, intersection.yMax - wallBuffer * 2 - doorSize + 1);
+                        doors.Add(new RectInt(intersection.x, pos, intersection.width, doorSize));
+                    }
+                }
             }
         }
     }
@@ -126,6 +165,12 @@ public class DungeonGenerator : MonoBehaviour
         foreach (RectInt room in rooms)
         {
             AlgorithmsUtils.DebugRectInt(room, Color.yellow);
+        }
+
+        // Draw doors in blue
+        foreach (RectInt door in doors)
+        {
+            AlgorithmsUtils.DebugRectInt(door, Color.blue);
         }
 
         // Draw dungeon in green
@@ -144,13 +189,15 @@ public class DungeonGenerator : MonoBehaviour
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonLength);
 
         // Reset dungeon
-        rooms = new List<RectInt>();
-        removedRooms = new List<RectInt>();
+        rooms.Clear();
+        removedRooms.Clear();
+        doors.Clear();
 
         // Create new dungeon
         rooms.Add(new RectInt(0, 0, dungeonWidth, dungeonLength));
         SplitRooms();
         RemoveRandomRooms();
+        GenerateDoors();
     }
     #endregion
 }
