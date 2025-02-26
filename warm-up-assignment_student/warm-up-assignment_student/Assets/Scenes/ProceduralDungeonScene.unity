@@ -409,10 +409,12 @@ MonoBehaviour:
   dungeonWidth: 1000
   dungeonLength: 1000
   roomMinWidth: 100
-  roomMinLength: 100
-  roomHeight: 50
-  ChanceToSplitRoom: 0.4
+  roomMinHeight: 100
+  minimumAmountOfRooms: 5
   splitAmount: 10
+  ChanceToSplitRoom: 0.5
+  minRoomsToBeRemoved: 5
+  maxRoomsToBeRemoved: 10
   rooms: []
 --- !u!4 &563225899
 Transform:
