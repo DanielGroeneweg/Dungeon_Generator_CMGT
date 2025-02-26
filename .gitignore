@@ -71,3 +71,8 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+warm-up-assignment_student/warm-up-assignment_student/Logs
+warm-up-assignment_student/warm-up-assignment_student/UserSettings
+warm-up-assignment_student/warm-up-assignment_student/Temp
+warm-up-assignment_student/warm-up-assignment_student/obj
+warm-up-assignment_student/warm-up-assignment_student/Library
