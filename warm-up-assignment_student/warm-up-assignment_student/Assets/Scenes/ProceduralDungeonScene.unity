@@ -406,6 +406,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de312d78b4597cf4fb2e71879d3ca376, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useSeed: 0
+  seed: 1
   dungeonWidth: 1000
   dungeonHeight: 1000
   roomMinWidth: 100

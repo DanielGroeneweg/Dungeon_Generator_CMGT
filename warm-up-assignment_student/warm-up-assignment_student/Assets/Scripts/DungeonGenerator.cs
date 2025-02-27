@@ -6,6 +6,10 @@ using System;
 public class DungeonGenerator : MonoBehaviour
 {
     #region variables
+    [Header("Seed")]
+    [SerializeField] private bool useSeed = false;
+    [ShowIf("useSeed")] [SerializeField] private int seed = 1; 
+
     [Header("Dungeon Stats")]
     [SerializeField] private int dungeonWidth = 1000;
     [SerializeField] private int dungeonHeight = 1000;
@@ -276,6 +280,10 @@ public class DungeonGenerator : MonoBehaviour
     [Button(enabledMode: EButtonEnableMode.Playmode)]
     public void GenerateDungeon()
     {
+        // Random seed
+        if (useSeed) Random.InitState(seed);
+        else Random.InitState(System.Environment.TickCount);
+
         // Generate outer room (dungeon outlines)
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
 
