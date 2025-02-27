@@ -372,7 +372,6 @@ public class DungeonGenerator : MonoBehaviour
             float ratio = (float)Mathf.Min(room.room.width, room.room.height) / (float)Mathf.Max(room.room.width, room.room.height);
             if (Mathf.Abs(1 - ratio) < Mathf.Abs(1 - ratioOffset))
             {
-                Debug.Log("Ratio: " + ratioOffset + " being changed to: " + ratio);
                 ratioOffset = ratio;
                 mostSquareRoom = room;
             }
@@ -381,14 +380,13 @@ public class DungeonGenerator : MonoBehaviour
     }
     private Room LeastSquareRoom()
     {
-        float ratioOffset = -1;
+        float ratioOffset = 1;
         Room leastSquareRoom = null;
         foreach (Room room in rooms)
         {
             float ratio = (float)Mathf.Min(room.room.width, room.room.height) / (float)Mathf.Max(room.room.width, room.room.height);
             if (Mathf.Abs(1 - ratio) > Mathf.Abs(1 - ratioOffset))
             {
-                Debug.Log("Ratio: " + ratioOffset + " being changed to: " + ratio);
                 ratioOffset = ratio;
                 leastSquareRoom = room;
             }
