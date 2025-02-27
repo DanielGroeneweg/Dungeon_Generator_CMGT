@@ -1,9 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System;
 using Random = UnityEngine.Random;
 using NaughtyAttributes;
-using Unity.VisualScripting;
+using System;
 public class DungeonGenerator : MonoBehaviour
 {
     #region variables
@@ -25,7 +24,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField][Range(0f, 1f)] private float ChanceToSplitRoom = 0.5f;
     [SerializeField] private int minRoomsToBeRemoved = 5;
     [SerializeField] private int maxRoomsToBeRemoved = 10;
-    public enum RoomTargets { SmallestRoom, LargestRoom, RandomRoom}
+    public enum RoomTargets { SmallestRoom, LargestRoom, RandomRoom, MostSquareRoom, LeastSquareRoom}
     [SerializeField] private RoomTargets firstRoomTarget;
 
     [Header("Rooms")]
@@ -310,6 +309,12 @@ public class DungeonGenerator : MonoBehaviour
             case RoomTargets.RandomRoom:
                 firstRoom = RandomRoom();
                 break;
+            case RoomTargets.MostSquareRoom:
+                firstRoom = MostSquareRoom();
+                break;
+            case RoomTargets.LeastSquareRoom:
+                firstRoom = LeastSquareRoom();
+                break;
         }
         firstRoom.isConnectedToDungeon = true;
         RemoveUnconnectedRooms();
@@ -349,6 +354,38 @@ public class DungeonGenerator : MonoBehaviour
     private Room RandomRoom()
     {
         return rooms[Random.Range(0, rooms.Count)];
+    }
+    private Room MostSquareRoom()
+    {
+        float ratioOffset = -1;
+        Room mostSquareRoom = null;
+        foreach (Room room in rooms)
+        {
+            float ratio = (float)Mathf.Min(room.room.width, room.room.height) / (float)Mathf.Max(room.room.width, room.room.height);
+            if (Mathf.Abs(1 - ratio) < Mathf.Abs(1 - ratioOffset))
+            {
+                Debug.Log("Ratio: " + ratioOffset + " being changed to: " + ratio);
+                ratioOffset = ratio;
+                mostSquareRoom = room;
+            }
+        }
+        return mostSquareRoom;
+    }
+    private Room LeastSquareRoom()
+    {
+        float ratioOffset = -1;
+        Room leastSquareRoom = null;
+        foreach (Room room in rooms)
+        {
+            float ratio = (float)Mathf.Min(room.room.width, room.room.height) / (float)Mathf.Max(room.room.width, room.room.height);
+            if (Mathf.Abs(1 - ratio) > Mathf.Abs(1 - ratioOffset))
+            {
+                Debug.Log("Ratio: " + ratioOffset + " being changed to: " + ratio);
+                ratioOffset = ratio;
+                leastSquareRoom = room;
+            }
+        }
+        return leastSquareRoom;
     }
     #endregion
 }
