@@ -253,19 +253,19 @@ public class DungeonGenerator : MonoBehaviour
             AlgorithmsUtils.DebugRectInt(door, Color.blue);
         }
 
-        // Draw random removed rooms in orange
+        // Draw random removed rooms in red
         foreach (RectInt room in randomRemovedRooms)
         {
             AlgorithmsUtils.DebugRectInt(room, Color.red);
         }
 
-        // Draw unconnected removed rooms in red
+        // Draw unconnected removed rooms in magenta
         foreach (RectInt room in unconnectedRemovedRooms)
         {
             AlgorithmsUtils.DebugRectInt(room, Color.magenta);
         }
 
-        // Draw dungeon in green
+        // Draw dungeon in dark green
         AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
 
         // Draw the first room in green

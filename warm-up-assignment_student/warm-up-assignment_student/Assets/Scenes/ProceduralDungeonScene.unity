@@ -407,18 +407,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dungeonWidth: 1000
-  dungeonLength: 1000
+  dungeonHeight: 1000
   roomMinWidth: 100
   roomMinHeight: 100
   wallBuffer: 2
   doorSize: 6
   minimumAmountOfRooms: 5
-  splitAmount: 10
+  splitAmount: 6
   ChanceToSplitRoom: 0.5
   minRoomsToBeRemoved: 5
   maxRoomsToBeRemoved: 10
+  firstRoomTarget: 0
   rooms: []
-  doors: []
 --- !u!4 &563225899
 Transform:
   m_ObjectHideFlags: 0
