@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using NaughtyAttributes;
 using System;
+using System.Linq;
+
 public class DungeonGenerator : MonoBehaviour
 {
     #region variables
     [Header("Seed")]
     [SerializeField] private bool useSeed = false;
-    [ShowIf("useSeed")] [SerializeField] private int seed = 1; 
+    [ShowIf("useSeed")][SerializeField] private int seed = 1;
 
     [Header("Dungeon Stats")]
     [SerializeField] private int dungeonWidth = 1000;
@@ -28,7 +30,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField][Range(0f, 1f)] private float ChanceToSplitRoom = 0.5f;
     [SerializeField] private int minRoomsToBeRemoved = 5;
     [SerializeField] private int maxRoomsToBeRemoved = 10;
-    public enum RoomTargets { SmallestRoom, LargestRoom, RandomRoom, MostSquareRoom, LeastSquareRoom}
+    public enum RoomTargets { SmallestRoom, LargestRoom, RandomRoom, MostSquareRoom, LeastSquareRoom, firstRoomInList, LastRoomInList, MostConnectedRooms }
     [SerializeField] private RoomTargets firstRoomTarget;
 
     [Header("Rooms")]
@@ -173,7 +175,7 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
     }
-    private void RemoveUnconnectedRooms()
+    private void FindConnectedRooms(List<Room> list)
     {
         bool foundConnectedRooms = true;
 
@@ -183,30 +185,98 @@ public class DungeonGenerator : MonoBehaviour
             foundConnectedRooms = false;
 
             // For each room check each other room
-            for (int i = 0; i < rooms.Count; i++)
+            for (int i = 0; i < list.Count; i++)
             {
-                for (int j = i + 1; j < rooms.Count; j++)
+                for (int j = i + 1; j < list.Count; j++)
                 {
                     // if only one of the rooms is connected to the dungeon and the rooms overlap, set both rooms to being connected
-                    if (rooms[i].isConnectedToDungeon != rooms[j].isConnectedToDungeon && AlgorithmsUtils.Intersects(rooms[i].room, rooms[j].room))
+                    if (list[i].isConnectedToDungeon != list[j].isConnectedToDungeon && AlgorithmsUtils.Intersects(list[i].room, list[j].room))
                     {
                         foundConnectedRooms = true;
-                        rooms[i].isConnectedToDungeon = true;
-                        rooms[j].isConnectedToDungeon = true;
+                        list[i].isConnectedToDungeon = true;
+                        list[j].isConnectedToDungeon = true;
                     }
                 }
             }
         }
-
+    }
+    private List<Room> RemoveUnconnectedRooms(List<Room> list)
+    {
+        List<Room> removedRooms = new List<Room>();
         // Inverse Loop to remove all rooms not connected in any way to the picked room
-        for (int i = rooms.Count - 1; i >= 0; i--)
+        for (int i = list.Count - 1; i >= 0; i--)
         {
-            if (!rooms[i].isConnectedToDungeon)
+            if (!list[i].isConnectedToDungeon)
             {
-                unconnectedRemovedRooms.Add(rooms[i].room);
-                rooms.RemoveAt(i);
+                removedRooms.Add(list[i]);
+                list.RemoveAt(i);
             }
         }
+
+        return removedRooms;
+    }
+    private void FindMostConnectedRooms()
+    {
+        // A list that has groups (lists) of connected rooms
+        List<List<Room>> connectedRoomGroups = new List<List<Room>>();
+
+        // A list that has every room that is not in a connected room group
+        List<Room> remainingRooms = new List<Room>(rooms);
+
+        // While there are still rooms in the list of unsorted rooms
+        while (remainingRooms.Count > 0)
+        {
+            // Check which of those are connected to the first room
+            List<Room> connectedRooms = CheckWhichRoomsAreConnected(remainingRooms);
+
+            // Remove the unconnected rooms from that list and store those removed rooms in the remainingRooms list
+            remainingRooms = RemoveUnconnectedRooms(connectedRooms);
+
+            // Add the connected rooms as a group to the list of connected room groups
+            connectedRoomGroups.Add(connectedRooms);
+        }
+
+        // Check which group has the most connected rooms
+        int highestRoomCount = 0;
+        List<Room> mostConnectedRoomList = new List<Room>(); 
+        foreach (List<Room> connectedRoomGroup in connectedRoomGroups)
+        {
+            if (connectedRoomGroup.Count > highestRoomCount)
+            {
+                highestRoomCount = connectedRoomGroup.Count;
+                mostConnectedRoomList = connectedRoomGroup;
+            }
+        }
+
+        for (int i = connectedRoomGroups.Count - 1; i >= 0; i--)
+        {
+            if (connectedRoomGroups[i] != mostConnectedRoomList)
+            {
+                for (int j = connectedRoomGroups[i].Count - 1; i >= 0; i--)
+                {
+                    Debug.Log(j);
+                    unconnectedRemovedRooms.Add(connectedRoomGroups[i][j].room);
+                    rooms.Remove(connectedRoomGroups[i][j]);
+                }
+            }
+        }
+
+        rooms = mostConnectedRoomList;
+    }
+    private List<Room> CheckWhichRoomsAreConnected(List<Room> roomList)
+    {
+        List<Room> list = new List<Room>();
+
+        foreach (Room room in roomList)
+        { 
+            list.Add(room);
+        }
+
+        list[0].isConnectedToDungeon = true;
+
+        FindConnectedRooms(list);
+
+        return (list);
     }
     #endregion
 
@@ -272,7 +342,7 @@ public class DungeonGenerator : MonoBehaviour
         AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
 
         // Draw the first room in green
-        AlgorithmsUtils.DebugRectInt(firstRoom.room, Color.green);
+        if (firstRoomTarget != RoomTargets.MostConnectedRooms) AlgorithmsUtils.DebugRectInt(firstRoom.room, Color.green);
     }
     #endregion
 
@@ -282,7 +352,12 @@ public class DungeonGenerator : MonoBehaviour
     {
         // Random seed
         if (useSeed) Random.InitState(seed);
-        else Random.InitState(System.Environment.TickCount);
+        else
+        {
+            Random.InitState(System.Environment.TickCount);
+            seed = Random.seed;
+        }
+        Debug.Log("Random Seed: " + seed);
 
         // Generate outer room (dungeon outlines)
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
@@ -323,13 +398,38 @@ public class DungeonGenerator : MonoBehaviour
             case RoomTargets.LeastSquareRoom:
                 firstRoom = LeastSquareRoom();
                 break;
+            case RoomTargets.firstRoomInList:
+                firstRoom = FirstRoomInList();
+                break;
+            case RoomTargets.LastRoomInList:
+                firstRoom = LastRoomInList();
+                break;
+            case RoomTargets.MostConnectedRooms:
+                break;
         }
-        firstRoom.isConnectedToDungeon = true;
-        RemoveUnconnectedRooms();
+
+        if (firstRoomTarget == RoomTargets.MostConnectedRooms)
+        {
+            FindMostConnectedRooms();
+        }
+
+        else
+        {
+            firstRoom.isConnectedToDungeon = true;
+            FindConnectedRooms(rooms);
+            List<Room> unconnectedRooms = RemoveUnconnectedRooms(rooms);
+            foreach (Room room in unconnectedRooms)
+            {
+                unconnectedRemovedRooms.Add(room.room);
+            }
+        }
 
         // Create doors to connect rooms to eachother
         GenerateDoors();
     }
+    #endregion
+
+    #region FirstRoom
     private Room SmallestRoom()
     {
         Room smallestRoom = new Room();
@@ -392,6 +492,14 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
         return leastSquareRoom;
+    }
+    private Room FirstRoomInList()
+    {
+        return rooms[0];
+    }
+    private Room LastRoomInList()
+    {
+        return rooms[rooms.Count - 1];
     }
     #endregion
 }

@@ -415,11 +415,11 @@ MonoBehaviour:
   wallBuffer: 2
   doorSize: 6
   minimumAmountOfRooms: 5
-  splitAmount: 6
+  splitAmount: 8
   ChanceToSplitRoom: 0.5
   minRoomsToBeRemoved: 5
   maxRoomsToBeRemoved: 10
-  firstRoomTarget: 0
+  firstRoomTarget: 2
   rooms: []
 --- !u!4 &563225899
 Transform:
