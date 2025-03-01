@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using NaughtyAttributes;
 using System;
-using System.Linq;
-
 public class DungeonGenerator : MonoBehaviour
 {
     #region variables
@@ -30,6 +28,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField][Range(0f, 1f)] private float ChanceToSplitRoom = 0.5f;
     [SerializeField] private int minRoomsToBeRemoved = 5;
     [SerializeField] private int maxRoomsToBeRemoved = 10;
+    [SerializeField][Range(0f, 1f)] private float maxPercentageOfRoomsToBeRemoved = 0.5f;
     public enum RoomTargets { SmallestRoom, LargestRoom, RandomRoom, MostSquareRoom, LeastSquareRoom, firstRoomInList, LastRoomInList, MostConnectedRooms }
     [SerializeField] private RoomTargets firstRoomTarget;
 
@@ -161,20 +160,26 @@ public class DungeonGenerator : MonoBehaviour
     #region RoomRemoving
     private void RemoveRandomRooms()
     {
+        float roomCountAtStart = rooms.Count;
+        float percentageRemoved = 1f - rooms.Count / roomCountAtStart;
+        
         // Pick a random amount of rooms to be removed that lies between the minimum to be removed and maximum to be removed
         int toBeDestroyed = Random.Range(minRoomsToBeRemoved, maxRoomsToBeRemoved + 1);
+
         for (int i = 1; i <= toBeDestroyed; i++)
         {
-            // Make sure there is always at least 1 room
-            if (rooms.Count > minimumAmountOfRooms)
+            if (percentageRemoved < maxPercentageOfRoomsToBeRemoved)
             {
                 // Pick a random room and remove it
                 int index = Random.Range(0, rooms.Count);
                 randomRemovedRooms.Add(rooms[index].room);
                 rooms.RemoveAt(index);
+                percentageRemoved = 1f - rooms.Count / roomCountAtStart;
             }
         }
     }
+    // Modifies the rooms in the list so that all rooms connected have their bool set to true
+    // Requires at least 1 room with the bool set to true already
     private void FindConnectedRooms(List<Room> list)
     {
         bool foundConnectedRooms = true;
@@ -200,6 +205,8 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
     }
+    // Modifies the given list by removing all rooms that have the bool set to false
+    // Returns a list of all rooms that are removed
     private List<Room> RemoveUnconnectedRooms(List<Room> list)
     {
         List<Room> removedRooms = new List<Room>();
@@ -215,6 +222,7 @@ public class DungeonGenerator : MonoBehaviour
 
         return removedRooms;
     }
+    // Starts an algorithm to find the group of rooms that has the largest amount of rooms, then picks that one as the dungeon
     private void FindMostConnectedRooms()
     {
         // A list that has groups (lists) of connected rooms
@@ -248,13 +256,13 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
 
+        // Remove all rooms from the original rooms list that are not in the most connected group
         for (int i = connectedRoomGroups.Count - 1; i >= 0; i--)
         {
             if (connectedRoomGroups[i] != mostConnectedRoomList)
             {
-                for (int j = connectedRoomGroups[i].Count - 1; i >= 0; i--)
+                for (int j = connectedRoomGroups[i].Count - 1; j >= 0; j--)
                 {
-                    Debug.Log(j);
                     unconnectedRemovedRooms.Add(connectedRoomGroups[i][j].room);
                     rooms.Remove(connectedRoomGroups[i][j]);
                 }
@@ -262,21 +270,16 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         rooms = mostConnectedRoomList;
+        firstRoom = rooms[0];
     }
+    // Sets the bool to true for the first room in the list, then returns the list with bools set to true for all connected rooms
     private List<Room> CheckWhichRoomsAreConnected(List<Room> roomList)
     {
-        List<Room> list = new List<Room>();
+        roomList[0].isConnectedToDungeon = true;
 
-        foreach (Room room in roomList)
-        { 
-            list.Add(room);
-        }
+        FindConnectedRooms(roomList);
 
-        list[0].isConnectedToDungeon = true;
-
-        FindConnectedRooms(list);
-
-        return (list);
+        return (roomList);
     }
     #endregion
 
@@ -342,7 +345,7 @@ public class DungeonGenerator : MonoBehaviour
         AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
 
         // Draw the first room in green
-        if (firstRoomTarget != RoomTargets.MostConnectedRooms) AlgorithmsUtils.DebugRectInt(firstRoom.room, Color.green);
+        AlgorithmsUtils.DebugRectInt(firstRoom.room, Color.green);
     }
     #endregion
 
@@ -355,9 +358,9 @@ public class DungeonGenerator : MonoBehaviour
         else
         {
             Random.InitState(System.Environment.TickCount);
-            seed = Random.seed;
+            seed = System.Environment.TickCount;
         }
-        Debug.Log("Random Seed: " + seed);
+        //Debug.Log("Random Seed: " + seed);
 
         // Generate outer room (dungeon outlines)
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
