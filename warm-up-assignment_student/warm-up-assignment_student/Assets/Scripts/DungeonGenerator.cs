@@ -39,6 +39,7 @@ public class DungeonGenerator : MonoBehaviour
     {
         public RectInt room;
         public bool isConnectedToDungeon = false;
+        public bool hasDoorsPlaced = false;
     }
 
     // Not in inspector
@@ -286,27 +287,43 @@ public class DungeonGenerator : MonoBehaviour
     #region DoorGenerating
     private void GenerateDoors()
     {
-        // For each room, check for each other room if they overlap
-        for (int i = 0; i < rooms.Count; i++)
-        {
-            for (int j = i + 1; j < rooms.Count; j++)
-            {
-                if (AlgorithmsUtils.Intersects(rooms[i].room, rooms[j].room))
-                {
-                    RectInt intersection = AlgorithmsUtils.Intersect(rooms[i].room, rooms[j].room);
-                    if (intersection.width > intersection.height)
-                    {
-                        if (intersection.width >= wallBuffer * 4 + doorSize)
-                        {
-                            int pos = Random.Range(intersection.xMin + wallBuffer * 2, intersection.xMax - wallBuffer * 2 - doorSize + 1);
-                            doors.Add(new RectInt(pos, intersection.y, doorSize, intersection.height));
-                        }
-                    }
+        rooms[0].hasDoorsPlaced = true;
+        bool placedDoors = true;
 
-                    else if (intersection.height >= wallBuffer * 4 + doorSize)
+        // Go through the list of rooms until all rooms have a door
+        while (placedDoors)
+        {
+            placedDoors = false;
+
+            // For each room, check each other room
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                for (int j = i + 1; j < rooms.Count; j++)
+                {
+                    // if ONE of the rooms has no doors yet and the rooms are next to eachother, place a door at a random location
+                    if (rooms[i].hasDoorsPlaced != rooms[j].hasDoorsPlaced && AlgorithmsUtils.Intersects(rooms[i].room, rooms[j].room))
                     {
-                        int pos = Random.Range(intersection.yMin + wallBuffer * 2, intersection.yMax - wallBuffer * 2 - doorSize + 1);
-                        doors.Add(new RectInt(intersection.x, pos, intersection.width, doorSize));
+                        RectInt intersection = AlgorithmsUtils.Intersect(rooms[i].room, rooms[j].room);
+                        if (intersection.width > intersection.height)
+                        {
+                            if (intersection.width >= wallBuffer * 4 + doorSize)
+                            {
+                                int pos = Random.Range(intersection.xMin + wallBuffer * 2, intersection.xMax - wallBuffer * 2 - doorSize + 1);
+                                doors.Add(new RectInt(pos, intersection.y, doorSize, intersection.height));
+                                rooms[i].hasDoorsPlaced = true;
+                                rooms[j].hasDoorsPlaced = true;
+                                placedDoors = true;
+                            }
+                        }
+
+                        else if (intersection.height >= wallBuffer * 4 + doorSize)
+                        {
+                            int pos = Random.Range(intersection.yMin + wallBuffer * 2, intersection.yMax - wallBuffer * 2 - doorSize + 1);
+                            doors.Add(new RectInt(intersection.x, pos, intersection.width, doorSize));
+                            rooms[i].hasDoorsPlaced = true;
+                            rooms[j].hasDoorsPlaced = true;
+                            placedDoors = true;
+                        }
                     }
                 }
             }
@@ -360,7 +377,7 @@ public class DungeonGenerator : MonoBehaviour
             Random.InitState(System.Environment.TickCount);
             seed = System.Environment.TickCount;
         }
-        //Debug.Log("Random Seed: " + seed);
+        Debug.Log("Random Seed: " + seed);
 
         // Generate outer room (dungeon outlines)
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
