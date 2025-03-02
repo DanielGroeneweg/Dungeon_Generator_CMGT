@@ -97,13 +97,13 @@ public class DungeonGenerator : MonoBehaviour
                         if (rooms[i].room.height / 2 > roomMinHeight)
                         {
                             SplitHorizontally(rooms[i]);
-                            yield return new WaitForSeconds(0.1f);
+                            yield return new WaitForSeconds(timeBetweenSteps);
                         }
 
                         else if (rooms[i].room.width / 2 > roomMinWidth)
                         {
                             SplitVertically(rooms[i]);
-                            yield return new WaitForSeconds(0.1f);
+                            yield return new WaitForSeconds(timeBetweenSteps);
                         }
                     }
                     else
@@ -112,13 +112,13 @@ public class DungeonGenerator : MonoBehaviour
                         if (rooms[i].room.width / 2 > roomMinWidth)
                         {
                             SplitVertically(rooms[i]);
-                            yield return new WaitForSeconds(0.1f);
+                            yield return new WaitForSeconds(timeBetweenSteps);
                         }
 
                         else if (rooms[i].room.height / 2 > roomMinHeight)
                         {
                             SplitHorizontally(rooms[i]);
-                            yield return new WaitForSeconds(0.1f);
+                            yield return new WaitForSeconds(timeBetweenSteps);
                         }
                     }
                 }
