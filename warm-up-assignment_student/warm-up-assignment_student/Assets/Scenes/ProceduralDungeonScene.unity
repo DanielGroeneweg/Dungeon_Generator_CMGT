@@ -407,14 +407,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useSeed: 0
-  seed: 499421
+  seed: 2147483647
   dungeonWidth: 1000
   dungeonHeight: 1000
   roomMinWidth: 100
   roomMinHeight: 100
   wallBuffer: 2
   doorSize: 6
-  minimumAmountOfRooms: 5
+  minimumAmountOfRooms: 10
   splitAmount: 8
   ChanceToSplitRoom: 0.6
   minRoomsToBeRemoved: 5

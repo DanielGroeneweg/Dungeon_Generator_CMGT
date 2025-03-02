@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using NaughtyAttributes;
 using System;
+using UnityEngine.UIElements;
 public class DungeonGenerator : MonoBehaviour
 {
     #region variables
@@ -163,7 +164,7 @@ public class DungeonGenerator : MonoBehaviour
     {
         float roomCountAtStart = rooms.Count;
         float percentageRemoved = 1f - rooms.Count / roomCountAtStart;
-        
+
         // Pick a random amount of rooms to be removed that lies between the minimum to be removed and maximum to be removed
         int toBeDestroyed = Random.Range(minRoomsToBeRemoved, maxRoomsToBeRemoved + 1);
 
@@ -247,7 +248,7 @@ public class DungeonGenerator : MonoBehaviour
 
         // Check which group has the most connected rooms
         int highestRoomCount = 0;
-        List<Room> mostConnectedRoomList = new List<Room>(); 
+        List<Room> mostConnectedRoomList = new List<Room>();
         foreach (List<Room> connectedRoomGroup in connectedRoomGroups)
         {
             if (connectedRoomGroup.Count > highestRoomCount)
@@ -370,28 +371,7 @@ public class DungeonGenerator : MonoBehaviour
     [Button(enabledMode: EButtonEnableMode.Playmode)]
     public void GenerateDungeon()
     {
-        // Random seed
-        if (useSeed) Random.InitState(seed);
-        else
-        {
-            Random.InitState(System.Environment.TickCount);
-            seed = System.Environment.TickCount;
-        }
-        Debug.Log("Random Seed: " + seed);
-
-        // Generate outer room (dungeon outlines)
-        dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
-
-        // Reset dungeon
-        rooms.Clear();
-        randomRemovedRooms.Clear();
-        unconnectedRemovedRooms.Clear();
-        doors.Clear();
-
-        // Create the first room
-        Room dungeonSizedRoom = new Room();
-        dungeonSizedRoom.room = new RectInt(0, 0, dungeonWidth, dungeonHeight);
-        rooms.Add(dungeonSizedRoom);
+        ResetDungeon();
 
         // Split the dungeon rooms
         SplitRooms();
@@ -400,7 +380,7 @@ public class DungeonGenerator : MonoBehaviour
         RemoveRandomRooms();
 
         // Determine the first room of the dungeon
-        firstRoom = null;
+        firstRoom = new Room();
         switch (firstRoomTarget)
         {
             case RoomTargets.SmallestRoom:
@@ -446,6 +426,31 @@ public class DungeonGenerator : MonoBehaviour
 
         // Create doors to connect rooms to eachother
         GenerateDoors();
+    }
+    private void ResetDungeon()
+    {
+        // Reset lists
+        rooms.Clear();
+        randomRemovedRooms.Clear();
+        unconnectedRemovedRooms.Clear();
+        doors.Clear();
+
+        // Random seed
+        if (useSeed) Random.InitState(seed);
+        else
+        {
+            Random.InitState(System.Environment.TickCount);
+            seed = System.Environment.TickCount;
+        }
+        Debug.Log("Random Seed: " + seed);
+
+        // Generate outer room (dungeon outlines)
+        dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
+
+        // Create the first room
+        Room dungeonSizedRoom = new Room();
+        dungeonSizedRoom.room = new RectInt(0, 0, dungeonWidth, dungeonHeight);
+        rooms.Add(dungeonSizedRoom);
     }
     #endregion
 
