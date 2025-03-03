@@ -52,14 +52,14 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private bool showFirstRoom = true;
     [SerializeField] private bool showDungeonOutLine = true;
     [SerializeField] private bool showRandomRemovedRooms = true;
-    [SerializeField] private bool showUnconnectedRemovedRooms = true;
+    [SerializeField] private bool showDisconnectedRemovedRooms = true;
 
     // Not in inspector
     private RectInt dungeon;
     private Room firstRoom;
     private List<RectInt> doors;
     private List<RectInt> randomRemovedRooms;
-    private List<RectInt> unconnectedRemovedRooms;
+    private List<RectInt> disconnectedRemovedRooms;
 
     private bool generating = false;
     private bool finishedSplitting = false;
@@ -74,7 +74,7 @@ public class DungeonGenerator : MonoBehaviour
         firstRoom.room = new RectInt(0, 0, dungeonWidth, dungeonHeight);
         rooms = new List<Room>();
         randomRemovedRooms = new List<RectInt>();
-        unconnectedRemovedRooms = new List<RectInt>();
+        disconnectedRemovedRooms = new List<RectInt>();
         doors = new List<RectInt>();
     }
 
@@ -276,7 +276,7 @@ public class DungeonGenerator : MonoBehaviour
     }
     #endregion
 
-    #region Unconnected
+    #region Disconnected
     // Starts an algorithm to find the group of rooms that has the largest amount of rooms, then picks that one as the dungeon
     // Coroutine for visualization
     private IEnumerator FindMostConnectedRooms()
@@ -292,7 +292,7 @@ public class DungeonGenerator : MonoBehaviour
             List<Room> connectedRooms = CheckWhichRoomsAreConnected(remainingRooms);
 
             // Remove the unconnected rooms from that list and store those removed rooms in the remainingRooms list
-            remainingRooms = RemoveUnconnectedRooms(connectedRooms);
+            remainingRooms = RemoveDisconnectedRooms(connectedRooms);
 
             // Add the connected rooms as a group to the list of connected room groups
             connectedRoomGroups.Add(connectedRooms);
@@ -317,7 +317,7 @@ public class DungeonGenerator : MonoBehaviour
             {
                 for (int j = connectedRoomGroups[i].Count - 1; j >= 0; j--)
                 {
-                    unconnectedRemovedRooms.Add(connectedRoomGroups[i][j].room);
+                    disconnectedRemovedRooms.Add(connectedRoomGroups[i][j].room);
                     rooms.Remove(connectedRoomGroups[i][j]);
                     yield return new WaitForSeconds(timeBetweenSteps);
                 }
@@ -344,7 +344,7 @@ public class DungeonGenerator : MonoBehaviour
             List<Room> connectedRooms = CheckWhichRoomsAreConnected(remainingRooms);
 
             // Remove the unconnected rooms from that list and store those removed rooms in the remainingRooms list
-            remainingRooms = RemoveUnconnectedRooms(connectedRooms);
+            remainingRooms = RemoveDisconnectedRooms(connectedRooms);
 
             // Add the connected rooms as a group to the list of connected room groups
             connectedRoomGroups.Add(connectedRooms);
@@ -369,7 +369,7 @@ public class DungeonGenerator : MonoBehaviour
             {
                 for (int j = connectedRoomGroups[i].Count - 1; j >= 0; j--)
                 {
-                    unconnectedRemovedRooms.Add(connectedRoomGroups[i][j].room);
+                    disconnectedRemovedRooms.Add(connectedRoomGroups[i][j].room);
                     rooms.Remove(connectedRoomGroups[i][j]);
                 }
             }
@@ -380,7 +380,7 @@ public class DungeonGenerator : MonoBehaviour
     }
     // Modifies the given list by removing all rooms that have the bool set to false
     // Returns a list of all rooms that are removed
-    private List<Room> RemoveUnconnectedRooms(List<Room> list)
+    private List<Room> RemoveDisconnectedRooms(List<Room> list)
     {
         List<Room> removedRooms = new List<Room>();
         // Inverse Loop to remove all rooms not connected in any way to the picked room
@@ -423,9 +423,13 @@ public class DungeonGenerator : MonoBehaviour
                     // if only one of the rooms is connected to the dungeon and the rooms overlap, set both rooms to being connected
                     if (list[i].isConnectedToDungeon != list[j].isConnectedToDungeon && AlgorithmsUtils.Intersects(list[i].room, list[j].room))
                     {
-                        foundConnectedRooms = true;
-                        list[i].isConnectedToDungeon = true;
-                        list[j].isConnectedToDungeon = true;
+                        RectInt intersect = AlgorithmsUtils.Intersect(list[i].room, list[j].room);
+                        if (intersect.width >= wallBuffer * 2 + doorSize || intersect.height >= wallBuffer * 2 + doorSize)
+                        {
+                            foundConnectedRooms = true;
+                            list[i].isConnectedToDungeon = true;
+                            list[j].isConnectedToDungeon = true;
+                        }
                     }
                 }
             }
@@ -561,10 +565,10 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
 
-        if (showUnconnectedRemovedRooms)
+        if (showDisconnectedRemovedRooms)
         {
             // Draw unconnected removed rooms in magenta
-            foreach (RectInt room in unconnectedRemovedRooms)
+            foreach (RectInt room in disconnectedRemovedRooms)
             {
                 AlgorithmsUtils.DebugRectInt(room, Color.magenta);
             }
@@ -655,7 +659,7 @@ public class DungeonGenerator : MonoBehaviour
         // Reset lists
         rooms.Clear();
         randomRemovedRooms.Clear();
-        unconnectedRemovedRooms.Clear();
+        disconnectedRemovedRooms.Clear();
         doors.Clear();
 
         // Random seed
