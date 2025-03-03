@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Random = UnityEngine.Random;
 using NaughtyAttributes;
 using System;
 using UnityEngine.UIElements;
@@ -9,8 +8,7 @@ public class DungeonGenerator : MonoBehaviour
 {
     #region variables
     [Header("Generation Method")]
-    [SerializeField] private bool visualizeSteps = false;
-    [ShowIf("visualizeSteps")][SerializeField] private float timeBetweenSteps = 0.1f;
+    [SerializeField] private float timeBetweenSteps = 0.1f;
 
     [Header("Seed")]
     [SerializeField] private bool useSeed = false;
@@ -61,11 +59,12 @@ public class DungeonGenerator : MonoBehaviour
     private List<RectInt> randomRemovedRooms;
     private List<RectInt> disconnectedRemovedRooms;
 
-    private bool generating = false;
     private bool finishedSplitting = false;
     private bool finishedRandomRemoval = false;
     private bool finishedRestRemoval = false;
     private bool finishedDoors = false;
+
+    private System.Random random;
     #endregion
     private void Start()
     {
@@ -88,10 +87,10 @@ public class DungeonGenerator : MonoBehaviour
             for (int i = rooms.Count - 1; i >= 0; i--)
             {
                 // there is a ChanceToSplitRoom chance that a room is going to be split, unless the minimum amount of rooms has not been reached yet
-                if (Random.Range(0f, 1f) <= ChanceToSplitRoom || rooms.Count < minimumAmountOfRooms)
+                if (random.Next(0, 100) <= ChanceToSplitRoom * 100f || rooms.Count < minimumAmountOfRooms)
                 {
                     // Choose how to split
-                    if (Random.Range(0, 2) == 1)
+                    if (random.Next(0, 1) == 1)
                     {
                         // Split horizontally if the room will not become too small, otherwise try vertically
                         if (rooms[i].room.height / 2 > roomMinHeight)
@@ -128,36 +127,6 @@ public class DungeonGenerator : MonoBehaviour
         finishedSplitting = true;
         StopCoroutine(SplitRooms());
     }
-    // Normal method for instant generation
-    private void SplitRoomsFast()
-    {
-        // go through the list of rooms splitAmount times
-        for (int loop = 1; loop <= splitAmount; loop++)
-        {
-            for (int i = rooms.Count - 1; i >= 0; i--)
-            {
-                // there is a ChanceToSplitRoom chance that a room is going to be split, unless the minimum amount of rooms has not been reached yet
-                if (Random.Range(0f, 1f) <= ChanceToSplitRoom || rooms.Count < minimumAmountOfRooms)
-                {
-                    // Choose how to split
-                    if (Random.Range(0, 2) == 1)
-                    {
-                        // Split horizontally if the room will not become too small, otherwise try vertically
-                        if (rooms[i].room.height / 2 > roomMinHeight) SplitHorizontally(rooms[i]);
-
-                        else if (rooms[i].room.width / 2 > roomMinWidth) SplitVertically(rooms[i]);
-                    }
-                    else
-                    {
-                        // Split vertically if the room will not become too small, otherwise try horizontally
-                        if (rooms[i].room.width / 2 > roomMinWidth) SplitVertically(rooms[i]);
-
-                        else if (rooms[i].room.height / 2 > roomMinHeight) SplitHorizontally(rooms[i]);
-                    }
-                }
-            }
-        }
-    }
     // Split room horizontally (reduce the y/height)
     private void SplitHorizontally(Room roomObject)
     {
@@ -165,7 +134,7 @@ public class DungeonGenerator : MonoBehaviour
         RectInt room = roomObject.room;
 
         // create 2 room sizes, randomly picked based on the size of the room being split
-        int randomSize = Random.Range(roomMinHeight, room.height - roomMinHeight + 1);
+        int randomSize = random.Next(roomMinHeight, room.height - roomMinHeight);
         int restSize = room.height - randomSize;
 
         // adds the walls to the room size to ensure rooms can overlap
@@ -198,7 +167,7 @@ public class DungeonGenerator : MonoBehaviour
         RectInt room = roomObject.room;
 
         // create 2 room sizes, randomly picked based on the size of the room being split
-        int randomSize = Random.Range(roomMinWidth, room.width - roomMinWidth + 1);
+        int randomSize = random.Next(roomMinWidth, room.width - roomMinWidth);
         int restSize = room.width - randomSize;
 
         // adds the walls to the room size to ensure rooms can overlap
@@ -235,14 +204,14 @@ public class DungeonGenerator : MonoBehaviour
         float percentageRemoved = 1f - rooms.Count / roomCountAtStart;
 
         // Pick a random amount of rooms to be removed that lies between the minimum to be removed and maximum to be removed
-        int toBeDestroyed = Random.Range(minRoomsToBeRemoved, maxRoomsToBeRemoved + 1);
+        int toBeDestroyed = random.Next(minRoomsToBeRemoved, maxRoomsToBeRemoved);
 
         for (int i = 1; i <= toBeDestroyed; i++)
         {
             if (percentageRemoved < maxPercentageOfRoomsToBeRemoved)
             {
                 // Pick a random room and remove it
-                int index = Random.Range(0, rooms.Count);
+                int index = random.Next(0, rooms.Count - 1);
                 randomRemovedRooms.Add(rooms[index].room);
                 rooms.RemoveAt(index);
                 percentageRemoved = 1f - rooms.Count / roomCountAtStart;
@@ -252,27 +221,6 @@ public class DungeonGenerator : MonoBehaviour
 
         finishedRandomRemoval = true;
         StopCoroutine(RemoveRandomRooms());
-    }
-    // Normal method for instant generation
-    private void RemoveRandomRoomsFast()
-    {
-        float roomCountAtStart = rooms.Count;
-        float percentageRemoved = 1f - rooms.Count / roomCountAtStart;
-
-        // Pick a random amount of rooms to be removed that lies between the minimum to be removed and maximum to be removed
-        int toBeDestroyed = Random.Range(minRoomsToBeRemoved, maxRoomsToBeRemoved + 1);
-
-        for (int i = 1; i <= toBeDestroyed; i++)
-        {
-            if (percentageRemoved < maxPercentageOfRoomsToBeRemoved)
-            {
-                // Pick a random room and remove it
-                int index = Random.Range(0, rooms.Count);
-                randomRemovedRooms.Add(rooms[index].room);
-                rooms.RemoveAt(index);
-                percentageRemoved = 1f - rooms.Count / roomCountAtStart;
-            }
-        }
     }
     #endregion
 
@@ -329,54 +277,6 @@ public class DungeonGenerator : MonoBehaviour
 
         finishedRestRemoval = true;
         StopCoroutine(FindMostConnectedRooms());
-    }
-    // Normal method for instant generation
-    private void FindMostConnectedRoomsFast()
-    {
-        List<List<Room>> connectedRoomGroups = new List<List<Room>>();
-
-        List<Room> remainingRooms = new List<Room>(rooms);
-
-        // While there are still rooms in the list of unsorted rooms
-        while (remainingRooms.Count > 0)
-        {
-            // Check which of those are connected to the first room
-            List<Room> connectedRooms = CheckWhichRoomsAreConnected(remainingRooms);
-
-            // Remove the unconnected rooms from that list and store those removed rooms in the remainingRooms list
-            remainingRooms = RemoveDisconnectedRooms(connectedRooms);
-
-            // Add the connected rooms as a group to the list of connected room groups
-            connectedRoomGroups.Add(connectedRooms);
-        }
-
-        // Check which group has the most connected rooms
-        int highestRoomCount = 0;
-        List<Room> mostConnectedRoomList = new List<Room>();
-        foreach (List<Room> connectedRoomGroup in connectedRoomGroups)
-        {
-            if (connectedRoomGroup.Count > highestRoomCount)
-            {
-                highestRoomCount = connectedRoomGroup.Count;
-                mostConnectedRoomList = connectedRoomGroup;
-            }
-        }
-
-        // Remove all rooms from the original rooms list that are not in the most connected group
-        for (int i = connectedRoomGroups.Count - 1; i >= 0; i--)
-        {
-            if (connectedRoomGroups[i] != mostConnectedRoomList)
-            {
-                for (int j = connectedRoomGroups[i].Count - 1; j >= 0; j--)
-                {
-                    disconnectedRemovedRooms.Add(connectedRoomGroups[i][j].room);
-                    rooms.Remove(connectedRoomGroups[i][j]);
-                }
-            }
-        }
-
-        rooms = mostConnectedRoomList;
-        firstRoom = rooms[0];
     }
     // Modifies the given list by removing all rooms that have the bool set to false
     // Returns a list of all rooms that are removed
@@ -463,7 +363,7 @@ public class DungeonGenerator : MonoBehaviour
                         {
                             if (intersection.width >= wallBuffer * 4 + doorSize)
                             {
-                                int pos = Random.Range(intersection.xMin + wallBuffer * 2, intersection.xMax - wallBuffer * 2 - doorSize + 1);
+                                int pos = random.Next(intersection.xMin + wallBuffer * 2, intersection.xMax - wallBuffer * 2 - doorSize);
                                 doors.Add(new RectInt(pos, intersection.y, doorSize, intersection.height));
                                 rooms[i].hasDoorsPlaced = true;
                                 rooms[j].hasDoorsPlaced = true;
@@ -474,7 +374,7 @@ public class DungeonGenerator : MonoBehaviour
 
                         else if (intersection.height >= wallBuffer * 4 + doorSize)
                         {
-                            int pos = Random.Range(intersection.yMin + wallBuffer * 2, intersection.yMax - wallBuffer * 2 - doorSize + 1);
+                            int pos = random.Next(intersection.yMin + wallBuffer * 2, intersection.yMax - wallBuffer * 2 - doorSize);
                             doors.Add(new RectInt(intersection.x, pos, intersection.width, doorSize));
                             rooms[i].hasDoorsPlaced = true;
                             rooms[j].hasDoorsPlaced = true;
@@ -487,51 +387,6 @@ public class DungeonGenerator : MonoBehaviour
         }
         finishedDoors = true;
         StopCoroutine(GenerateDoors());
-    }
-    // Normal method for instant generation
-    private void GenerateDoorsFast()
-    {
-        rooms[0].hasDoorsPlaced = true;
-        bool placedDoors = true;
-
-        // Go through the list of rooms until all rooms have a door
-        while (placedDoors)
-        {
-            placedDoors = false;
-
-            // For each room, check each other room
-            for (int i = 0; i < rooms.Count; i++)
-            {
-                for (int j = i + 1; j < rooms.Count; j++)
-                {
-                    // if ONE of the rooms has no doors yet and the rooms are next to eachother, place a door at a random location
-                    if (rooms[i].hasDoorsPlaced != rooms[j].hasDoorsPlaced && AlgorithmsUtils.Intersects(rooms[i].room, rooms[j].room))
-                    {
-                        RectInt intersection = AlgorithmsUtils.Intersect(rooms[i].room, rooms[j].room);
-                        if (intersection.width > intersection.height)
-                        {
-                            if (intersection.width >= wallBuffer * 4 + doorSize)
-                            {
-                                int pos = Random.Range(intersection.xMin + wallBuffer * 2, intersection.xMax - wallBuffer * 2 - doorSize + 1);
-                                doors.Add(new RectInt(pos, intersection.y, doorSize, intersection.height));
-                                rooms[i].hasDoorsPlaced = true;
-                                rooms[j].hasDoorsPlaced = true;
-                                placedDoors = true;
-                            }
-                        }
-
-                        else if (intersection.height >= wallBuffer * 4 + doorSize)
-                        {
-                            int pos = Random.Range(intersection.yMin + wallBuffer * 2, intersection.yMax - wallBuffer * 2 - doorSize + 1);
-                            doors.Add(new RectInt(intersection.x, pos, intersection.width, doorSize));
-                            rooms[i].hasDoorsPlaced = true;
-                            rooms[j].hasDoorsPlaced = true;
-                            placedDoors = true;
-                        }
-                    }
-                }
-            }
-        }
     }
     #endregion
 
@@ -587,70 +442,36 @@ public class DungeonGenerator : MonoBehaviour
     public void GenerateDungeon()
     {
         ResetDungeon();
-
-        if (visualizeSteps) StartCoroutine(DungeonGeneration());
         
-        else
-        {
-            SplitRoomsFast();
-
-            RemoveRandomRoomsFast();
-
-            FindMostConnectedRoomsFast();
-
-            GenerateDoorsFast();
-        }
+        StartCoroutine(DungeonGeneration());
     }
     // Coroutine for visualization
     private IEnumerator DungeonGeneration()
     {
-        bool startedSplitting = false;
-        bool startedRandomRemoval = false;
-        bool startedRestRemoval = false;
-        bool startedDoors = false;
-        while (generating)
-        {
-            // Split the dungeon rooms
-            if (!startedSplitting)
-            {
-                startedSplitting = true;
-                StartCoroutine(SplitRooms());
-            }
+        // Split the dungeon rooms
+        StartCoroutine(SplitRooms());
 
-            // Remove random rooms from the dungeon
-            if (!startedRandomRemoval && finishedSplitting)
-            {
-                startedRandomRemoval = true;
-                StartCoroutine(RemoveRandomRooms());
-            }
+        // Remove random rooms from the dungeon
+        yield return new WaitUntil(() => finishedSplitting);
+        StartCoroutine(RemoveRandomRooms());
 
-            // Remove unconnected rooms from the dungeon
-            if (!startedRestRemoval && finishedRandomRemoval)
-            {
-                startedRestRemoval = true;
-                StartCoroutine(FindMostConnectedRooms());
-            }
+        // Remove unconnected rooms from the dungeon
+        yield return new WaitUntil(() => finishedRandomRemoval);
+        StartCoroutine(FindMostConnectedRooms());
 
-            // Create doors to connect rooms to eachother
-            if (!startedDoors && finishedRestRemoval)
-            {
-                startedDoors = true;
-                StartCoroutine(GenerateDoors());
-            }
+        // Create doors to connect rooms to eachother
+        yield return new WaitUntil(() => finishedRestRemoval);
+        StartCoroutine(GenerateDoors());
 
-            if (finishedDoors) generating = false;
-
-            yield return new WaitForSeconds(1);
-        }
-
+        // Stop the coroutine
+        yield return new WaitUntil(() => finishedDoors);
         StopCoroutine(DungeonGeneration());
     }
     private void ResetDungeon()
     {
-        if (visualizeSteps) StopAllCoroutines();
+        StopAllCoroutines();
 
         // Reset bools
-        generating = true;
         finishedSplitting = false;
         finishedRandomRemoval = false;
         finishedRestRemoval = false;
@@ -663,10 +484,10 @@ public class DungeonGenerator : MonoBehaviour
         doors.Clear();
 
         // Random seed
-        if (useSeed) Random.InitState(seed);
+        if (useSeed) random = new System.Random(seed);
         else
         {
-            Random.InitState(System.Environment.TickCount);
+            random = new System.Random(System.Environment.TickCount);
             seed = System.Environment.TickCount;
         }
         Debug.Log("Random Seed: " + seed);

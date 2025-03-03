@@ -406,10 +406,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de312d78b4597cf4fb2e71879d3ca376, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visualizeSteps: 1
   timeBetweenSteps: 0.1
-  useSeed: 0
-  seed: 2147483647
+  useSeed: 1
+  seed: 337842468
   dungeonWidth: 1000
   dungeonHeight: 1000
   roomMinWidth: 100
@@ -428,7 +427,7 @@ MonoBehaviour:
   showFirstRoom: 1
   showDungeonOutLine: 1
   showRandomRemovedRooms: 1
-  showUnconnectedRemovedRooms: 1
+  showDisconnectedRemovedRooms: 1
 --- !u!4 &563225899
 Transform:
   m_ObjectHideFlags: 0
