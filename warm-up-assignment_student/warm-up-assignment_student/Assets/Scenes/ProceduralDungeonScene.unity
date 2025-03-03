@@ -406,8 +406,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de312d78b4597cf4fb2e71879d3ca376, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeBetweenSteps: 0.1
-  useSeed: 1
+  timeBetweenSteps: 0
+  useSeed: 0
   seed: 337842468
   dungeonWidth: 1000
   dungeonHeight: 1000
@@ -416,11 +416,10 @@ MonoBehaviour:
   wallBuffer: 2
   doorSize: 6
   minimumAmountOfRooms: 10
-  splitAmount: 8
+  splitAmount: 20
   ChanceToSplitRoom: 0.6
-  minRoomsToBeRemoved: 5
-  maxRoomsToBeRemoved: 10
-  maxPercentageOfRoomsToBeRemoved: 0.4
+  minRoomsToBeRemovedPercentage: 0.2
+  maxRoomsToBeRemovedPercentage: 0.4
   rooms: []
   showRooms: 1
   showDoors: 1

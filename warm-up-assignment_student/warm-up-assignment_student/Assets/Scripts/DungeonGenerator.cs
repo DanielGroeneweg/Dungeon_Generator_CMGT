@@ -30,9 +30,8 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private int minimumAmountOfRooms = 5;
     [SerializeField] private int splitAmount = 10;
     [SerializeField][Range(0f, 1f)] private float ChanceToSplitRoom = 0.5f;
-    [SerializeField] private int minRoomsToBeRemoved = 5;
-    [SerializeField] private int maxRoomsToBeRemoved = 10;
-    [SerializeField][Range(0f, 1f)] private float maxPercentageOfRoomsToBeRemoved = 0.5f;
+    [Range(0f, 1f)][SerializeField] private float minRoomsToBeRemovedPercentage = 0.1f;
+    [Range(0f, 1f)][SerializeField] private float maxRoomsToBeRemovedPercentage = 0.5f;
 
     [Header("Rooms")]
     [SerializeField] private List<Room> rooms;
@@ -204,19 +203,16 @@ public class DungeonGenerator : MonoBehaviour
         float percentageRemoved = 1f - rooms.Count / roomCountAtStart;
 
         // Pick a random amount of rooms to be removed that lies between the minimum to be removed and maximum to be removed
-        int toBeDestroyed = random.Next(minRoomsToBeRemoved, maxRoomsToBeRemoved);
+        float toBeDestroyed = random.Next((int)(minRoomsToBeRemovedPercentage * 100), (int)(maxRoomsToBeRemovedPercentage * 100)) / 100f;
 
-        for (int i = 1; i <= toBeDestroyed; i++)
+        while (percentageRemoved < toBeDestroyed)
         {
-            if (percentageRemoved < maxPercentageOfRoomsToBeRemoved)
-            {
-                // Pick a random room and remove it
-                int index = random.Next(0, rooms.Count - 1);
-                randomRemovedRooms.Add(rooms[index].room);
-                rooms.RemoveAt(index);
-                percentageRemoved = 1f - rooms.Count / roomCountAtStart;
-                yield return new WaitForSeconds(timeBetweenSteps);
-            }
+            // Pick a random room and remove it
+            int index = random.Next(0, rooms.Count - 1);
+            randomRemovedRooms.Add(rooms[index].room);
+            rooms.RemoveAt(index);
+            percentageRemoved = 1f - rooms.Count / roomCountAtStart;
+            yield return new WaitForSeconds(timeBetweenSteps);
         }
 
         finishedRandomRemoval = true;
@@ -393,6 +389,9 @@ public class DungeonGenerator : MonoBehaviour
     #region DungeonDrawing
     void Update()
     {
+        // While Running, fix the maxRoomsToBeDestroyed
+        if (maxRoomsToBeRemovedPercentage < minRoomsToBeRemovedPercentage) maxRoomsToBeRemovedPercentage = minRoomsToBeRemovedPercentage;
+
         // Draw existing rooms in yellow
         if (showRooms)
         {
