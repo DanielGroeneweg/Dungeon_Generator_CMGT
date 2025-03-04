@@ -416,7 +416,7 @@ MonoBehaviour:
   wallBuffer: 2
   doorSize: 6
   minimumAmountOfRooms: 10
-  splitAmount: 20
+  splitAmount: 12
   ChanceToSplitRoom: 0.6
   minRoomsToBeRemovedPercentage: 0.2
   maxRoomsToBeRemovedPercentage: 0.4

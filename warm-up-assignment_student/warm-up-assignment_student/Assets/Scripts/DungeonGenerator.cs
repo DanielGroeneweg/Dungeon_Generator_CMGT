@@ -86,10 +86,10 @@ public class DungeonGenerator : MonoBehaviour
             for (int i = rooms.Count - 1; i >= 0; i--)
             {
                 // there is a ChanceToSplitRoom chance that a room is going to be split, unless the minimum amount of rooms has not been reached yet
-                if (random.Next(0, 100) <= ChanceToSplitRoom * 100f || rooms.Count < minimumAmountOfRooms)
+                if (random.Next(0, 101) <= ChanceToSplitRoom * 100f || rooms.Count < minimumAmountOfRooms)
                 {
                     // Choose how to split
-                    if (random.Next(0, 1) == 1)
+                    if (random.Next(0, 2) == 1)
                     {
                         // Split horizontally if the room will not become too small, otherwise try vertically
                         if (rooms[i].room.height / 2 > roomMinHeight)
@@ -133,15 +133,11 @@ public class DungeonGenerator : MonoBehaviour
         RectInt room = roomObject.room;
 
         // create 2 room sizes, randomly picked based on the size of the room being split
-        int randomSize = random.Next(roomMinHeight, room.height - roomMinHeight);
+        int randomSize = random.Next(roomMinHeight, room.height - roomMinHeight + 1);
         int restSize = room.height - randomSize;
 
-        // adds the walls to the room size to ensure rooms can overlap
-        randomSize += wallBuffer;
-        restSize += wallBuffer;
-
         // Create two new RectInts for the split rooms
-        RectInt roomTop = new RectInt(room.x, room.y + randomSize - wallBuffer * 2, room.width, restSize);
+        RectInt roomTop = new RectInt(room.x, room.y + randomSize - wallBuffer, room.width, restSize + wallBuffer);
         RectInt roomBottom = new RectInt(room.x, room.y, room.width, randomSize);
 
         // Create a new Room object for the top room
@@ -166,16 +162,12 @@ public class DungeonGenerator : MonoBehaviour
         RectInt room = roomObject.room;
 
         // create 2 room sizes, randomly picked based on the size of the room being split
-        int randomSize = random.Next(roomMinWidth, room.width - roomMinWidth);
+        int randomSize = random.Next(roomMinWidth, room.width - roomMinWidth + 1);
         int restSize = room.width - randomSize;
-
-        // adds the walls to the room size to ensure rooms can overlap
-        randomSize += wallBuffer;
-        restSize += wallBuffer;
 
         // Create two new RectInts for the split rooms
         RectInt roomLeft = new RectInt(room.x, room.y, randomSize, room.height);
-        RectInt roomRight = new RectInt(room.x + randomSize - wallBuffer * 2, room.y, restSize, room.height);
+        RectInt roomRight = new RectInt(room.x + randomSize - wallBuffer, room.y, restSize + wallBuffer, room.height);
 
         // Create a new Room object for the left room
         Room roomObjectLeft = new Room();
@@ -203,12 +195,12 @@ public class DungeonGenerator : MonoBehaviour
         float percentageRemoved = 1f - rooms.Count / roomCountAtStart;
 
         // Pick a random amount of rooms to be removed that lies between the minimum to be removed and maximum to be removed
-        float toBeDestroyed = random.Next((int)(minRoomsToBeRemovedPercentage * 100), (int)(maxRoomsToBeRemovedPercentage * 100)) / 100f;
+        float toBeDestroyed = random.Next((int)(minRoomsToBeRemovedPercentage * 100), (int)(maxRoomsToBeRemovedPercentage * 100) + 1) / 100f;
 
         while (percentageRemoved < toBeDestroyed)
         {
             // Pick a random room and remove it
-            int index = random.Next(0, rooms.Count - 1);
+            int index = random.Next(0, rooms.Count);
             randomRemovedRooms.Add(rooms[index].room);
             rooms.RemoveAt(index);
             percentageRemoved = 1f - rooms.Count / roomCountAtStart;
@@ -357,9 +349,9 @@ public class DungeonGenerator : MonoBehaviour
                         RectInt intersection = AlgorithmsUtils.Intersect(rooms[i].room, rooms[j].room);
                         if (intersection.width > intersection.height)
                         {
-                            if (intersection.width >= wallBuffer * 4 + doorSize)
+                            if (intersection.width >= wallBuffer * 2 + doorSize)
                             {
-                                int pos = random.Next(intersection.xMin + wallBuffer * 2, intersection.xMax - wallBuffer * 2 - doorSize);
+                                int pos = random.Next(intersection.xMin + wallBuffer, intersection.xMax - wallBuffer - doorSize + 1);
                                 doors.Add(new RectInt(pos, intersection.y, doorSize, intersection.height));
                                 rooms[i].hasDoorsPlaced = true;
                                 rooms[j].hasDoorsPlaced = true;
@@ -368,9 +360,9 @@ public class DungeonGenerator : MonoBehaviour
                             }
                         }
 
-                        else if (intersection.height >= wallBuffer * 4 + doorSize)
+                        else if (intersection.height >= wallBuffer * 2 + doorSize)
                         {
-                            int pos = random.Next(intersection.yMin + wallBuffer * 2, intersection.yMax - wallBuffer * 2 - doorSize);
+                            int pos = random.Next(intersection.yMin + wallBuffer, intersection.yMax - wallBuffer - doorSize + 1);
                             doors.Add(new RectInt(intersection.x, pos, intersection.width, doorSize));
                             rooms[i].hasDoorsPlaced = true;
                             rooms[j].hasDoorsPlaced = true;
