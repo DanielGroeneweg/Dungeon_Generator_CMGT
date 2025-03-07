@@ -33,16 +33,6 @@ public class DungeonGenerator : MonoBehaviour
     [Range(0f, 1f)][SerializeField] private float minRoomsToBeRemovedPercentage = 0.1f;
     [Range(0f, 1f)][SerializeField] private float maxRoomsToBeRemovedPercentage = 0.5f;
 
-    [Header("Rooms")]
-    [SerializeField] private List<Room> rooms;
-    [Serializable]
-    public class Room
-    {
-        public RectInt room;
-        public bool isConnectedToDungeon = false;
-        public bool hasDoorsPlaced = false;
-    }
-
     [Header("Visualization")]
     [SerializeField] private bool showRooms = true;
     [SerializeField] private bool showDoors = true;
@@ -52,17 +42,28 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private bool showDisconnectedRemovedRooms = true;
 
     // Not in inspector
+    public List<Room> rooms;
+    public class Room
+    {
+        public RectInt room;
+        public bool isConnectedToDungeon = false;
+        public bool hasDoorsPlaced = false;
+        //Dictionary<int, Room> adjacentRooms = new Dictionary<int, Room>();
+    }
+
     private RectInt dungeon;
     private Room firstRoom;
     private List<RectInt> doors;
     private List<RectInt> randomRemovedRooms;
     private List<RectInt> disconnectedRemovedRooms;
 
+    // Used for coroutines
     private bool finishedSplitting = false;
     private bool finishedRandomRemoval = false;
     private bool finishedRestRemoval = false;
     private bool finishedDoors = false;
 
+    // Random
     private System.Random random;
     #endregion
     private void Start()
@@ -126,7 +127,10 @@ public class DungeonGenerator : MonoBehaviour
         finishedSplitting = true;
         StopCoroutine(SplitRooms());
     }
-    // Split room horizontally (reduce the y/height)
+    /// <summary>
+    /// Split room horizontally (reduce the y/height)
+    /// </summary>
+    /// <param name="roomObject"></param>
     private void SplitHorizontally(Room roomObject)
     {
         // some casting to make the script readable
@@ -155,7 +159,10 @@ public class DungeonGenerator : MonoBehaviour
         // Remove the original room from the room list
         rooms.Remove(roomObject);
     }
-    // Split room vertically (reduce the x/width)
+    /// <summary>
+    /// Split room vertically (reduce the x/width)
+    /// </summary>
+    /// <param name="roomObject"></param>
     private void SplitVertically(Room roomObject)
     {
         // some casting to make the script readable
@@ -188,7 +195,6 @@ public class DungeonGenerator : MonoBehaviour
 
     #region RoomRemoving
     #region Random
-    // Coroutine for visualization
     private IEnumerator RemoveRandomRooms()
     {
         float roomCountAtStart = rooms.Count;
@@ -213,8 +219,10 @@ public class DungeonGenerator : MonoBehaviour
     #endregion
 
     #region Disconnected
-    // Starts an algorithm to find the group of rooms that has the largest amount of rooms, then picks that one as the dungeon
-    // Coroutine for visualization
+    /// <summary>
+    /// Starts an algorithm to find the group of rooms that has the largest amount of rooms, then picks that one as the dungeon
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator FindMostConnectedRooms()
     {
         List<List<Room>> connectedRoomGroups = new List<List<Room>>();
@@ -266,8 +274,12 @@ public class DungeonGenerator : MonoBehaviour
         finishedRestRemoval = true;
         StopCoroutine(FindMostConnectedRooms());
     }
-    // Modifies the given list by removing all rooms that have the bool set to false
-    // Returns a list of all rooms that are removed
+    /// <summary>
+    /// Modifies the given list by removing all rooms that have the bool set to false.
+    /// Returns a list of all rooms that are removed
+    /// </summary>
+    /// <param name="list"></param>
+    /// <returns></returns>
     private List<Room> RemoveDisconnectedRooms(List<Room> list)
     {
         List<Room> removedRooms = new List<Room>();
@@ -283,7 +295,11 @@ public class DungeonGenerator : MonoBehaviour
 
         return removedRooms;
     }
-    // Sets the bool to true for the first room in the list, then returns the list with bools set to true for all connected rooms
+    /// <summary>
+    /// Sets the bool to true for the first room in the list, then returns the list with bools set to true for all connected rooms
+    /// </summary>
+    /// <param name="roomList"></param>
+    /// <returns></returns>
     private List<Room> CheckWhichRoomsAreConnected(List<Room> roomList)
     {
         roomList[0].isConnectedToDungeon = true;
@@ -292,8 +308,12 @@ public class DungeonGenerator : MonoBehaviour
 
         return (roomList);
     }
-    // Modifies the rooms in the list so that all rooms connected have their bool set to true
-    // Requires at least 1 room with the bool set to true already
+    /// <summary>
+    /// Modifies the rooms in the list so that all rooms connected have their bool set to true.
+    /// Requires at least 1 room with the bool set to true already
+    /// </summary>
+    /// <param name="list"></param>
+
     private void FindConnectedRooms(List<Room> list)
     {
         bool foundConnectedRooms = true;
@@ -327,7 +347,6 @@ public class DungeonGenerator : MonoBehaviour
     #endregion
 
     #region DoorGenerating
-    // Coroutine for visualization
     private IEnumerator GenerateDoors()
     {
         rooms[0].hasDoorsPlaced = true;
@@ -436,7 +455,6 @@ public class DungeonGenerator : MonoBehaviour
         
         StartCoroutine(DungeonGeneration());
     }
-    // Coroutine for visualization
     private IEnumerator DungeonGeneration()
     {
         // Split the dungeon rooms
@@ -490,7 +508,6 @@ public class DungeonGenerator : MonoBehaviour
         Room dungeonSizedRoom = new Room();
         dungeonSizedRoom.room = new RectInt(0, 0, dungeonWidth, dungeonHeight);
         rooms.Add(dungeonSizedRoom);
-
         firstRoom = dungeonSizedRoom;
     }
     #endregion
