@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Graph<T>
 {
-    private Dictionary<T, List<T>> adjacencyList;
+    public Dictionary<T, List<T>> adjacencyList;
     public Graph() { adjacencyList = new Dictionary<T, List<T>>(); }
     public void AddNode(T node)
     {
@@ -12,7 +12,7 @@ public class Graph<T>
             adjacencyList[node] = new List<T>();
         }
     }
-    public void AddEdge(T fromNode, T toNode)
+    public void AddNeighbor(T fromNode, T toNode)
     {
         if (!adjacencyList.ContainsKey(fromNode) || !adjacencyList.ContainsKey(toNode))
         {
@@ -29,5 +29,18 @@ public class Graph<T>
             Debug.Log("Node does not exist in the graph.");
         }
         return adjacencyList[node];
+    }
+    public void PrintGraph()
+    {
+        foreach(var node in adjacencyList.Keys)
+        {
+            string neighbors = "";
+            foreach(var neighbor in adjacencyList[node])
+            {
+                neighbors += neighbor + ",";
+            }
+
+            Debug.Log(node + " has neighbors: " + neighbors);
+        }
     }
 }
