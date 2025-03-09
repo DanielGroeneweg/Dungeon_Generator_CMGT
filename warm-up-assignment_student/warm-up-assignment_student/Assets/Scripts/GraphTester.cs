@@ -4,10 +4,10 @@ public class GraphTester : MonoBehaviour
     void Start()
     {
         Graph<string> graph = new Graph<string>();
-        graph.AddNode("A");
-        graph.AddNode("B");
-        graph.AddNode("C");
-        graph.AddNode("D");
+        graph.AddRoom("A");
+        graph.AddRoom("B");
+        graph.AddRoom("C");
+        graph.AddRoom("D");
         graph.AddNeighbor("A", "B");
         graph.AddNeighbor("A", "C");
         graph.AddNeighbor("B", "D");

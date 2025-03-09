@@ -5,42 +5,47 @@ public class Graph<T>
 {
     public Dictionary<T, List<T>> adjacencyList;
     public Graph() { adjacencyList = new Dictionary<T, List<T>>(); }
-    public void AddNode(T node)
+    public void AddRoom(T room)
     {
-        if (!adjacencyList.ContainsKey(node))
+        if (!adjacencyList.ContainsKey(room))
         {
-            adjacencyList[node] = new List<T>();
+            adjacencyList[room] = new List<T>();
         }
     }
-    public void AddNeighbor(T fromNode, T toNode)
+    public void AddNeighbor(T fromRoom, T toRoom)
     {
-        if (!adjacencyList.ContainsKey(fromNode) || !adjacencyList.ContainsKey(toNode))
+        if (!adjacencyList.ContainsKey(fromRoom))
         {
-            Debug.Log("One or both nodes do not exist in the graph.");
+            Debug.Log("from room does not exist in the graph.");
             return;
         }
-        adjacencyList[fromNode].Add(toNode);
-        adjacencyList[toNode].Add(fromNode);
+        adjacencyList[fromRoom].Add(toRoom);
+        
+        if (adjacencyList.ContainsKey(toRoom)) adjacencyList[toRoom].Add(fromRoom);
     }
-    public List<T> GetNeighbors(T node)
+    public List<T> GetNeighbors(T room)
     {
-        if (!adjacencyList.ContainsKey(node))
+        if (!adjacencyList.ContainsKey(room))
         {
-            Debug.Log("Node does not exist in the graph.");
+            Debug.Log("Room does not exist in the graph.");
         }
-        return adjacencyList[node];
+        return adjacencyList[room];
     }
     public void PrintGraph()
     {
-        foreach(var node in adjacencyList.Keys)
+        foreach(var room in adjacencyList.Keys)
         {
             string neighbors = "";
-            foreach(var neighbor in adjacencyList[node])
+            foreach(var neighbor in adjacencyList[room])
             {
                 neighbors += neighbor + ",";
             }
 
-            Debug.Log(node + " has neighbors: " + neighbors);
+            Debug.Log(room + " has neighbors: " + neighbors);
         }
+    }
+    public void Test(T room)
+    {
+        var something = adjacencyList[room];
     }
 }

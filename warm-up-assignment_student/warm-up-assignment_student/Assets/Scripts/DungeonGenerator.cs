@@ -4,6 +4,7 @@ using NaughtyAttributes;
 using System;
 using UnityEngine.UIElements;
 using System.Collections;
+using System.Linq;
 public class DungeonGenerator : MonoBehaviour
 {
     #region variables
@@ -42,18 +43,18 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private bool showDisconnectedRemovedRooms = true;
 
     // Not in inspector
-    public List<Room> rooms;
+    public Graph<Room> rooms;
+    public Graph<Room> doors;
     public class Room
     {
-        public RectInt room;
+        public RectInt area;
         public bool isConnectedToDungeon = false;
         public bool hasDoorsPlaced = false;
-        //Dictionary<int, Room> adjacentRooms = new Dictionary<int, Room>();
+        public bool hasBeenVisited = false;
     }
 
     private RectInt dungeon;
     private Room firstRoom;
-    private List<RectInt> doors;
     private List<RectInt> randomRemovedRooms;
     private List<RectInt> disconnectedRemovedRooms;
 
@@ -70,11 +71,11 @@ public class DungeonGenerator : MonoBehaviour
     {
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
         firstRoom = new Room();
-        firstRoom.room = new RectInt(0, 0, dungeonWidth, dungeonHeight);
-        rooms = new List<Room>();
+        firstRoom.area = new RectInt(0, 0, dungeonWidth, dungeonHeight);
+        rooms = new Graph<Room>();
         randomRemovedRooms = new List<RectInt>();
         disconnectedRemovedRooms = new List<RectInt>();
-        doors = new List<RectInt>();
+        doors = new Graph<Room>();
     }
 
     #region RoomSplitting
@@ -84,39 +85,42 @@ public class DungeonGenerator : MonoBehaviour
         // go through the list of rooms splitAmount times
         for (int loop = 1; loop <= splitAmount; loop++)
         {
-            for (int i = rooms.Count - 1; i >= 0; i--)
+            List<Room> roomsToModify = new List<Room>(rooms.adjacencyList.Keys);
+
+            for (int i = roomsToModify.Count - 1; i >= 0; i--)
             {
                 // there is a ChanceToSplitRoom chance that a room is going to be split, unless the minimum amount of rooms has not been reached yet
-                if (random.Next(0, 101) <= ChanceToSplitRoom * 100f || rooms.Count < minimumAmountOfRooms)
+                if (random.Next(0, 101) <= ChanceToSplitRoom * 100f || rooms.adjacencyList.Count < minimumAmountOfRooms)
                 {
                     // Choose how to split
                     if (random.Next(0, 2) == 1)
                     {
+                        var variable = rooms.adjacencyList;
                         // Split horizontally if the room will not become too small, otherwise try vertically
-                        if (rooms[i].room.height / 2 > roomMinHeight)
+                        if (roomsToModify[i].area.height / 2 > roomMinHeight)
                         {
-                            SplitHorizontally(rooms[i]);
+                            SplitHorizontally(roomsToModify[i]);
                             yield return new WaitForSeconds(timeBetweenSteps);
                         }
 
-                        else if (rooms[i].room.width / 2 > roomMinWidth)
+                        else if (roomsToModify[i].area.width / 2 > roomMinWidth)
                         {
-                            SplitVertically(rooms[i]);
+                            SplitVertically(roomsToModify[i]);
                             yield return new WaitForSeconds(timeBetweenSteps);
                         }
                     }
                     else
                     {
                         // Split vertically if the room will not become too small, otherwise try horizontally
-                        if (rooms[i].room.width / 2 > roomMinWidth)
+                        if (roomsToModify[i].area.width / 2 > roomMinWidth)
                         {
-                            SplitVertically(rooms[i]);
+                            SplitVertically(roomsToModify[i]);
                             yield return new WaitForSeconds(timeBetweenSteps);
                         }
 
-                        else if (rooms[i].room.height / 2 > roomMinHeight)
+                        else if (roomsToModify[i].area.height / 2 > roomMinHeight)
                         {
-                            SplitHorizontally(rooms[i]);
+                            SplitHorizontally(roomsToModify[i]);
                             yield return new WaitForSeconds(timeBetweenSteps);
                         }
                     }
@@ -134,7 +138,7 @@ public class DungeonGenerator : MonoBehaviour
     private void SplitHorizontally(Room roomObject)
     {
         // some casting to make the script readable
-        RectInt room = roomObject.room;
+        RectInt room = roomObject.area;
 
         // create 2 room sizes, randomly picked based on the size of the room being split
         int randomSize = random.Next(roomMinHeight, room.height - roomMinHeight + 1);
@@ -146,18 +150,18 @@ public class DungeonGenerator : MonoBehaviour
 
         // Create a new Room object for the top room
         Room roomObjectTop = new Room();
-        roomObjectTop.room = roomTop;
+        roomObjectTop.area = roomTop;
 
         // Create a new Room object for the bottom room
         Room roomObjectBottom = new Room();
-        roomObjectBottom.room = roomBottom;
+        roomObjectBottom.area = roomBottom;
 
         // Add the newly created rooms to the room list
-        rooms.Add(roomObjectTop);
-        rooms.Add(roomObjectBottom);
+        rooms.AddRoom(roomObjectTop);
+        rooms.AddRoom(roomObjectBottom);
 
         // Remove the original room from the room list
-        rooms.Remove(roomObject);
+        rooms.adjacencyList.Remove(roomObject);
     }
     /// <summary>
     /// Split room vertically (reduce the x/width)
@@ -166,7 +170,7 @@ public class DungeonGenerator : MonoBehaviour
     private void SplitVertically(Room roomObject)
     {
         // some casting to make the script readable
-        RectInt room = roomObject.room;
+        RectInt room = roomObject.area;
 
         // create 2 room sizes, randomly picked based on the size of the room being split
         int randomSize = random.Next(roomMinWidth, room.width - roomMinWidth + 1);
@@ -178,18 +182,18 @@ public class DungeonGenerator : MonoBehaviour
 
         // Create a new Room object for the left room
         Room roomObjectLeft = new Room();
-        roomObjectLeft.room = roomLeft;
+        roomObjectLeft.area = roomLeft;
 
         // Create a new Room object for the right room
         Room roomObjectRight = new Room();
-        roomObjectRight.room = roomRight;
+        roomObjectRight.area = roomRight;
 
         // Add the newly created rooms to the room list
-        rooms.Add(roomObjectLeft);
-        rooms.Add(roomObjectRight);
+        rooms.AddRoom(roomObjectLeft);
+        rooms.AddRoom(roomObjectRight);
 
         // Remove the original room from the room list
-        rooms.Remove(roomObject);
+        rooms.adjacencyList.Remove(roomObject);
     }
     #endregion
 
@@ -197,19 +201,22 @@ public class DungeonGenerator : MonoBehaviour
     #region Random
     private IEnumerator RemoveRandomRooms()
     {
-        float roomCountAtStart = rooms.Count;
-        float percentageRemoved = 1f - rooms.Count / roomCountAtStart;
+        float roomCountAtStart = rooms.adjacencyList.Count;
+        float percentageRemoved = 1f - rooms.adjacencyList.Count / roomCountAtStart;
 
         // Pick a random amount of rooms to be removed that lies between the minimum to be removed and maximum to be removed
         float toBeDestroyed = random.Next((int)(minRoomsToBeRemovedPercentage * 100), (int)(maxRoomsToBeRemovedPercentage * 100) + 1) / 100f;
 
+        List<Room> roomList = new List<Room>(rooms.adjacencyList.Keys);
+
         while (percentageRemoved < toBeDestroyed)
         {
             // Pick a random room and remove it
-            int index = random.Next(0, rooms.Count);
-            randomRemovedRooms.Add(rooms[index].room);
-            rooms.RemoveAt(index);
-            percentageRemoved = 1f - rooms.Count / roomCountAtStart;
+            int index = random.Next(0, rooms.adjacencyList.Count);
+            Room roomToBeDestroyed = roomList[index];
+            randomRemovedRooms.Add(roomToBeDestroyed.area);
+            rooms.adjacencyList.Remove(roomToBeDestroyed);
+            percentageRemoved = 1f - rooms.adjacencyList.Count / roomCountAtStart;
             yield return new WaitForSeconds(timeBetweenSteps);
         }
 
@@ -227,7 +234,7 @@ public class DungeonGenerator : MonoBehaviour
     {
         List<List<Room>> connectedRoomGroups = new List<List<Room>>();
 
-        List<Room> remainingRooms = new List<Room>(rooms);
+        List<Room> remainingRooms = new List<Room>(rooms.adjacencyList.Keys);
 
         // While there are still rooms in the list of unsorted rooms
         while (remainingRooms.Count > 0)
@@ -261,15 +268,14 @@ public class DungeonGenerator : MonoBehaviour
             {
                 for (int j = connectedRoomGroups[i].Count - 1; j >= 0; j--)
                 {
-                    disconnectedRemovedRooms.Add(connectedRoomGroups[i][j].room);
-                    rooms.Remove(connectedRoomGroups[i][j]);
+                    disconnectedRemovedRooms.Add(connectedRoomGroups[i][j].area);
+                    rooms.adjacencyList.Remove(connectedRoomGroups[i][j]);
                     yield return new WaitForSeconds(timeBetweenSteps);
                 }
             }
         }
 
-        rooms = mostConnectedRoomList;
-        firstRoom = rooms[0];
+        firstRoom = rooms.adjacencyList.Keys.First();
 
         finishedRestRemoval = true;
         StopCoroutine(FindMostConnectedRooms());
@@ -329,12 +335,13 @@ public class DungeonGenerator : MonoBehaviour
                 for (int j = i + 1; j < list.Count; j++)
                 {
                     // if only one of the rooms is connected to the dungeon and the rooms overlap, set both rooms to being connected
-                    if (list[i].isConnectedToDungeon != list[j].isConnectedToDungeon && AlgorithmsUtils.Intersects(list[i].room, list[j].room))
+                    if (list[i].isConnectedToDungeon != list[j].isConnectedToDungeon && AlgorithmsUtils.Intersects(list[i].area, list[j].area))
                     {
-                        RectInt intersect = AlgorithmsUtils.Intersect(list[i].room, list[j].room);
+                        RectInt intersect = AlgorithmsUtils.Intersect(list[i].area, list[j].area);
                         if (intersect.width >= wallBuffer * 2 + doorSize || intersect.height >= wallBuffer * 2 + doorSize)
                         {
                             foundConnectedRooms = true;
+                            rooms.AddNeighbor(list[i], list[j]);
                             list[i].isConnectedToDungeon = true;
                             list[j].isConnectedToDungeon = true;
                         }
@@ -349,7 +356,7 @@ public class DungeonGenerator : MonoBehaviour
     #region DoorGenerating
     private IEnumerator GenerateDoors()
     {
-        rooms[0].hasDoorsPlaced = true;
+        rooms.adjacencyList.Keys.First().hasDoorsPlaced = true;
         bool placedDoors = true;
 
         // Go through the list of rooms until all rooms have a door
@@ -358,33 +365,38 @@ public class DungeonGenerator : MonoBehaviour
             placedDoors = false;
 
             // For each room, check each other room
-            for (int i = 0; i < rooms.Count; i++)
+            foreach (Room room in rooms.adjacencyList.Keys)
             {
-                for (int j = i + 1; j < rooms.Count; j++)
+                foreach (Room neighbor in rooms.GetNeighbors(room))
                 {
                     // if ONE of the rooms has no doors yet and the rooms are next to eachother, place a door at a random location
-                    if (rooms[i].hasDoorsPlaced != rooms[j].hasDoorsPlaced && AlgorithmsUtils.Intersects(rooms[i].room, rooms[j].room))
+                    if (room.hasDoorsPlaced != neighbor.hasDoorsPlaced)
                     {
-                        RectInt intersection = AlgorithmsUtils.Intersect(rooms[i].room, rooms[j].room);
+                        RectInt intersection = AlgorithmsUtils.Intersect(room.area, neighbor.area);
                         if (intersection.width > intersection.height)
                         {
-                            if (intersection.width >= wallBuffer * 2 + doorSize)
-                            {
-                                int pos = random.Next(intersection.xMin + wallBuffer, intersection.xMax - wallBuffer - doorSize + 1);
-                                doors.Add(new RectInt(pos, intersection.y, doorSize, intersection.height));
-                                rooms[i].hasDoorsPlaced = true;
-                                rooms[j].hasDoorsPlaced = true;
-                                placedDoors = true;
-                                yield return new WaitForSeconds(timeBetweenSteps);
-                            }
+                            int pos = random.Next(intersection.xMin + wallBuffer, intersection.xMax - wallBuffer - doorSize + 1);
+                            Room door = new Room();
+                            door.area = new RectInt(pos, intersection.y, doorSize, intersection.height);
+                            doors.AddRoom(door);
+                            doors.AddNeighbor(door, room);
+                            doors.AddNeighbor(door, neighbor);
+                            room.hasDoorsPlaced = true;
+                            neighbor.hasDoorsPlaced = true;
+                            placedDoors = true;
+                            yield return new WaitForSeconds(timeBetweenSteps);
                         }
 
-                        else if (intersection.height >= wallBuffer * 2 + doorSize)
+                        else
                         {
                             int pos = random.Next(intersection.yMin + wallBuffer, intersection.yMax - wallBuffer - doorSize + 1);
-                            doors.Add(new RectInt(intersection.x, pos, intersection.width, doorSize));
-                            rooms[i].hasDoorsPlaced = true;
-                            rooms[j].hasDoorsPlaced = true;
+                            Room door = new Room();
+                            door.area = new RectInt(intersection.x, pos, intersection.width, doorSize);
+                            doors.AddRoom(door);
+                            doors.AddNeighbor(door, room);
+                            doors.AddNeighbor(door, neighbor);
+                            room.hasDoorsPlaced = true;
+                            neighbor.hasDoorsPlaced = true;
                             placedDoors = true;
                             yield return new WaitForSeconds(timeBetweenSteps);
                         }
@@ -406,18 +418,18 @@ public class DungeonGenerator : MonoBehaviour
         // Draw existing rooms in yellow
         if (showRooms)
         {
-            foreach (Room room in rooms)
+            foreach (Room room in rooms.adjacencyList.Keys)
             {
-                AlgorithmsUtils.DebugRectInt(room.room, Color.yellow);
+                AlgorithmsUtils.DebugRectInt(room.area, Color.yellow);
             }
         }
 
         if (showDoors)
         {
             // Draw doors in blue
-            foreach (RectInt door in doors)
+            foreach (Room door in doors.adjacencyList.Keys)
             {
-                AlgorithmsUtils.DebugRectInt(door, Color.blue);
+                AlgorithmsUtils.DebugRectInt(door.area, Color.blue);
             }
         }
 
@@ -443,7 +455,7 @@ public class DungeonGenerator : MonoBehaviour
         if (showDungeonOutLine) AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
 
         // Draw the first room in green
-        if (showFirstRoom) AlgorithmsUtils.DebugRectInt(firstRoom.room, Color.green);
+        if (showFirstRoom) AlgorithmsUtils.DebugRectInt(firstRoom.area, Color.green);
     }
     #endregion
 
@@ -487,10 +499,10 @@ public class DungeonGenerator : MonoBehaviour
         finishedDoors = false;
 
         // Reset lists
-        rooms.Clear();
+        rooms = new Graph<Room>();
+        doors = new Graph<Room>();
         randomRemovedRooms.Clear();
         disconnectedRemovedRooms.Clear();
-        doors.Clear();
 
         // Random seed
         if (useSeed) random = new System.Random(seed);
@@ -506,8 +518,8 @@ public class DungeonGenerator : MonoBehaviour
 
         // Create the first room
         Room dungeonSizedRoom = new Room();
-        dungeonSizedRoom.room = new RectInt(0, 0, dungeonWidth, dungeonHeight);
-        rooms.Add(dungeonSizedRoom);
+        dungeonSizedRoom.area = new RectInt(0, 0, dungeonWidth, dungeonHeight);
+        rooms.AddRoom(dungeonSizedRoom);
         firstRoom = dungeonSizedRoom;
     }
     #endregion
