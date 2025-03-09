@@ -38,14 +38,10 @@ public class Graph<T>
             string neighbors = "";
             foreach(var neighbor in adjacencyList[room])
             {
-                neighbors += neighbor + ",";
+                neighbors += ", " + neighbor;
             }
 
             Debug.Log(room + " has neighbors: " + neighbors);
         }
-    }
-    public void Test(T room)
-    {
-        var something = adjacencyList[room];
     }
 }
