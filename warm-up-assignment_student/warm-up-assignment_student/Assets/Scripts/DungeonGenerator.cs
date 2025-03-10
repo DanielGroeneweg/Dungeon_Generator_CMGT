@@ -28,9 +28,6 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private int doorSize = 6;
 
     [Header("Generation Stats")]
-    [SerializeField] private int minimumAmountOfRooms = 5;
-    [SerializeField] private int splitAmount = 10;
-    [SerializeField][Range(0f, 1f)] private float ChanceToSplitRoom = 0.5f;
     [Range(0f, 1f)][SerializeField] private float minRoomsToBeRemovedPercentage = 0.1f;
     [Range(0f, 1f)][SerializeField] private float maxRoomsToBeRemovedPercentage = 0.5f;
 
@@ -82,47 +79,49 @@ public class DungeonGenerator : MonoBehaviour
     // Coroutine for visualization
     private IEnumerator SplitRooms()
     {
+        bool changedARoom = true;
         // go through the list of rooms splitAmount times
-        for (int loop = 1; loop <= splitAmount; loop++)
+        while (changedARoom)
         {
-            List<Room> roomsToModify = new List<Room>(rooms.adjacencyList.Keys);
+            List<Room> unfinishedRooms = new List<Room>(rooms.adjacencyList.Keys);
+            changedARoom = false;
 
-            for (int i = roomsToModify.Count - 1; i >= 0; i--)
+            for (int i = unfinishedRooms.Count - 1; i >= 0; i--)
             {
-                // there is a ChanceToSplitRoom chance that a room is going to be split, unless the minimum amount of rooms has not been reached yet
-                if (random.Next(0, 101) <= ChanceToSplitRoom * 100f || rooms.adjacencyList.Count < minimumAmountOfRooms)
+                // Choose how to split
+                if (random.Next(0, 2) == 1)
                 {
-                    // Choose how to split
-                    if (random.Next(0, 2) == 1)
+                    var variable = rooms.adjacencyList;
+                    // Split horizontally if the room will not become too small, otherwise try vertically
+                    if (unfinishedRooms[i].area.height / 2 > roomMinHeight)
                     {
-                        var variable = rooms.adjacencyList;
-                        // Split horizontally if the room will not become too small, otherwise try vertically
-                        if (roomsToModify[i].area.height / 2 > roomMinHeight)
-                        {
-                            SplitHorizontally(roomsToModify[i]);
-                            yield return new WaitForSeconds(timeBetweenSteps);
-                        }
-
-                        else if (roomsToModify[i].area.width / 2 > roomMinWidth)
-                        {
-                            SplitVertically(roomsToModify[i]);
-                            yield return new WaitForSeconds(timeBetweenSteps);
-                        }
+                        SplitHorizontally(unfinishedRooms[i]);
+                        changedARoom = true;
+                        yield return new WaitForSeconds(timeBetweenSteps);
                     }
-                    else
-                    {
-                        // Split vertically if the room will not become too small, otherwise try horizontally
-                        if (roomsToModify[i].area.width / 2 > roomMinWidth)
-                        {
-                            SplitVertically(roomsToModify[i]);
-                            yield return new WaitForSeconds(timeBetweenSteps);
-                        }
 
-                        else if (roomsToModify[i].area.height / 2 > roomMinHeight)
-                        {
-                            SplitHorizontally(roomsToModify[i]);
-                            yield return new WaitForSeconds(timeBetweenSteps);
-                        }
+                    else if (unfinishedRooms[i].area.width / 2 > roomMinWidth)
+                    {
+                        SplitVertically(unfinishedRooms[i]);
+                        changedARoom = true;
+                        yield return new WaitForSeconds(timeBetweenSteps);
+                    }
+                }
+                else
+                {
+                    // Split vertically if the room will not become too small, otherwise try horizontally
+                    if (unfinishedRooms[i].area.width / 2 > roomMinWidth)
+                    {
+                        SplitVertically(unfinishedRooms[i]);
+                        changedARoom = true;
+                        yield return new WaitForSeconds(timeBetweenSteps);
+                    }
+
+                    else if (unfinishedRooms[i].area.height / 2 > roomMinHeight)
+                    {
+                        SplitHorizontally(unfinishedRooms[i]);
+                        changedARoom = true;
+                        yield return new WaitForSeconds(timeBetweenSteps);
                     }
                 }
             }
@@ -415,12 +414,12 @@ public class DungeonGenerator : MonoBehaviour
         // While Running, fix the maxRoomsToBeDestroyed
         if (maxRoomsToBeRemovedPercentage < minRoomsToBeRemovedPercentage) maxRoomsToBeRemovedPercentage = minRoomsToBeRemovedPercentage;
 
-        // Draw existing rooms in yellow
+        // Draw existing rooms in green
         if (showRooms)
         {
             foreach (Room room in rooms.adjacencyList.Keys)
             {
-                AlgorithmsUtils.DebugRectInt(room.area, Color.yellow);
+                AlgorithmsUtils.DebugRectInt(room.area, Color.green);
             }
         }
 
@@ -454,8 +453,8 @@ public class DungeonGenerator : MonoBehaviour
         // Draw dungeon in dark green
         if (showDungeonOutLine) AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
 
-        // Draw the first room in green
-        if (showFirstRoom) AlgorithmsUtils.DebugRectInt(firstRoom.area, Color.green);
+        // Draw the first room in cyan
+        if (showFirstRoom) AlgorithmsUtils.DebugRectInt(firstRoom.area, Color.cyan);
     }
     #endregion
 
