@@ -50,10 +50,11 @@ public class DungeonGenerator : MonoBehaviour
         public bool hasBeenVisited = false;
     }
 
-    private RectInt dungeon;
-    private Room firstRoom;
     private List<RectInt> randomRemovedRooms;
     private List<RectInt> disconnectedRemovedRooms;
+
+    private RectInt dungeon;
+    private Room firstRoom;
 
     // Used for coroutines
     private bool finishedSplitting = false;
