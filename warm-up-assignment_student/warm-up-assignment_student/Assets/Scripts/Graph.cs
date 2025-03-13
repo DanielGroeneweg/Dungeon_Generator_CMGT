@@ -5,43 +5,76 @@ public class Graph<T>
 {
     public Dictionary<T, List<T>> adjacencyList;
     public Graph() { adjacencyList = new Dictionary<T, List<T>>(); }
-    public void AddRoom(T room)
+    public void AddRoom(T node)
     {
-        if (!adjacencyList.ContainsKey(room))
+        if (!adjacencyList.ContainsKey(node))
         {
-            adjacencyList[room] = new List<T>();
+            adjacencyList[node] = new List<T>();
         }
     }
-    public void AddNeighbor(T fromRoom, T toRoom)
+    public void AddNeighbor(T fromNode, T toNode)
     {
-        if (!adjacencyList.ContainsKey(fromRoom))
+        if (!adjacencyList.ContainsKey(fromNode))
         {
             Debug.Log("from room does not exist in the graph.");
             return;
         }
-        adjacencyList[fromRoom].Add(toRoom);
-        
-        if (adjacencyList.ContainsKey(toRoom)) adjacencyList[toRoom].Add(fromRoom);
+        adjacencyList[fromNode].Add(toNode);
+
+        if (adjacencyList.ContainsKey(toNode)) adjacencyList[toNode].Add(fromNode);
     }
-    public List<T> GetNeighbors(T room)
+    public List<T> GetNeighbors(T node)
     {
-        if (!adjacencyList.ContainsKey(room))
+        if (!adjacencyList.ContainsKey(node))
         {
             Debug.Log("Room does not exist in the graph.");
         }
-        return adjacencyList[room];
+        return adjacencyList[node];
+    }
+    public void RemoveFromNeighbors(T nodeToRemove)
+    {
+        foreach (T key in adjacencyList.Keys)
+        {
+            if (adjacencyList[key].Contains(nodeToRemove)) adjacencyList[key].Remove(nodeToRemove);
+        }
     }
     public void PrintGraph()
     {
-        foreach(var room in adjacencyList.Keys)
+        foreach (T key in adjacencyList.Keys)
         {
             string neighbors = "";
-            foreach(var neighbor in adjacencyList[room])
+            foreach (T neighbor in adjacencyList[key])
             {
                 neighbors += ", " + neighbor;
             }
 
-            Debug.Log(room + " has neighbors: " + neighbors);
+            Debug.Log(key + " has neighbors: " + neighbors);
+        }
+    }
+    public List<T> KeysToList()
+    {
+        List<T> list = new List<T>();
+
+        foreach (T key in adjacencyList.Keys) list.Add(key);
+
+        return list;
+    }
+    public void DFS(T v)
+    {
+        HashSet<T> discovered = new HashSet<T>();
+        Stack<T> S = new Stack<T>();
+        S.Push(v);
+        while (S.Count > 0)
+        {
+            v = S.Pop();
+            if (!discovered.Contains(v))
+            {
+                discovered.Add(v);
+                foreach(T W in GetNeighbors(v))
+                {
+                    S.Push(W);
+                }
+            }
         }
     }
 }
