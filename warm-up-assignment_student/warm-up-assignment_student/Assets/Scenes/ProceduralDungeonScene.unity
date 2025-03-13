@@ -407,22 +407,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeBetweenSteps: 0
-  useSeed: 0
-  seed: 1202351734
+  useSeed: 1
+  seed: 3780078
   dungeonWidth: 1000
   dungeonHeight: 1000
   roomMinWidth: 100
   roomMinHeight: 100
   wallBuffer: 2
   doorSize: 6
-  percentageOfRoomsToRemove: 0.4
+  percentageOfRoomsToRemove: 0.2
   roomSizeToBeRemoved: 0
   showRooms: 1
   showDoors: 1
-  showFirstRoom: 1
   showDungeonOutLine: 1
-  showRandomRemovedRooms: 1
-  showDisconnectedRemovedRooms: 1
+  showRemovedRooms: 1
 --- !u!4 &563225899
 Transform:
   m_ObjectHideFlags: 0

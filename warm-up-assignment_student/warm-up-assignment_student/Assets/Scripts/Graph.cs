@@ -5,13 +5,22 @@ public class Graph<T>
 {
     public Dictionary<T, List<T>> adjacencyList;
     public Graph() { adjacencyList = new Dictionary<T, List<T>>(); }
-    public void AddRoom(T node)
+    /// <summary>
+    /// Adds the node to the list without any connections made
+    /// </summary>
+    /// <param name="node"></param>
+    public void AddNode(T node)
     {
         if (!adjacencyList.ContainsKey(node))
         {
             adjacencyList[node] = new List<T>();
         }
     }
+    /// <summary>
+    /// Creates a connection between two nodes, making them neighbors
+    /// </summary>
+    /// <param name="fromNode"></param>
+    /// <param name="toNode"></param>
     public void AddNeighbor(T fromNode, T toNode)
     {
         if (!adjacencyList.ContainsKey(fromNode))
@@ -23,6 +32,11 @@ public class Graph<T>
 
         if (adjacencyList.ContainsKey(toNode)) adjacencyList[toNode].Add(fromNode);
     }
+    /// <summary>
+    /// Returns a list of all neighboring nodes
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
     public List<T> GetNeighbors(T node)
     {
         if (!adjacencyList.ContainsKey(node))
@@ -31,12 +45,24 @@ public class Graph<T>
         }
         return adjacencyList[node];
     }
+    public int GetNeighborCount(T node)
+    {
+        return adjacencyList[node].Count;
+    }
+    /// <summary>
+    /// Removes a node as neighbor from all other nodes
+    /// </summary>
+    /// <param name="nodeToRemove"></param>
     public void RemoveFromNeighbors(T nodeToRemove)
     {
         foreach (T key in adjacencyList.Keys)
         {
             if (adjacencyList[key].Contains(nodeToRemove)) adjacencyList[key].Remove(nodeToRemove);
         }
+    }
+    public void ClearNeighbors()
+    {
+        foreach (T key in adjacencyList.Keys) adjacencyList[key].Clear();
     }
     public void PrintGraph()
     {
@@ -48,9 +74,13 @@ public class Graph<T>
                 neighbors += ", " + neighbor;
             }
 
-            Debug.Log(key + " has neighbors: " + neighbors);
+            Debug.Log(key + " has " + GetNeighborCount(key) + " neighbors: " + neighbors);
         }
     }
+    /// <summary>
+    /// Returns a list of all keys in the dictionary
+    /// </summary>
+    /// <returns></returns>
     public List<T> KeysToList()
     {
         List<T> list = new List<T>();
@@ -59,22 +89,41 @@ public class Graph<T>
 
         return list;
     }
-    public void DFS(T v)
+    /// <summary>
+    /// Uses Depth First Searching to create a spanning tree without loops. Requires connections to already exist
+    /// </summary>
+    /// <param name="node"></param>
+    public void DFS(T node)
     {
         HashSet<T> discovered = new HashSet<T>();
-        Stack<T> S = new Stack<T>();
-        S.Push(v);
-        while (S.Count > 0)
+        Stack<T> stack = new Stack<T>();
+
+        stack.Push(node);
+
+        Dictionary<T, T> nodeCameFrom = new Dictionary<T, T>();
+
+        while (stack.Count > 0)
         {
-            v = S.Pop();
-            if (!discovered.Contains(v))
+            node = stack.Pop();
+
+            if (!discovered.Contains(node))
             {
-                discovered.Add(v);
-                foreach(T W in GetNeighbors(v))
+                discovered.Add(node);
+                foreach (T neighbor in GetNeighbors(node))
                 {
-                    S.Push(W);
+                    stack.Push(neighbor);
+
+                    if (!nodeCameFrom.ContainsKey(neighbor)) nodeCameFrom.Add(neighbor, node);
+                    else nodeCameFrom[neighbor] = node;
                 }
             }
+        }
+
+        ClearNeighbors();
+
+        foreach (T key in nodeCameFrom.Keys)
+        {
+            if (!adjacencyList[key].Contains(nodeCameFrom[key])) AddNeighbor(key, nodeCameFrom[key]);
         }
     }
 }
