@@ -4,7 +4,8 @@ using UnityEngine;
 public class Graph<T>
 {
     public Dictionary<T, List<T>> adjacencyList;
-    public Graph() { adjacencyList = new Dictionary<T, List<T>>(); }
+    private List<T> keys;
+    public Graph() { adjacencyList = new Dictionary<T, List<T>>(); keys = new List<T>(); }
     /// <summary>
     /// Adds the node to the list without any connections made
     /// </summary>
@@ -14,7 +15,14 @@ public class Graph<T>
         if (!adjacencyList.ContainsKey(node))
         {
             adjacencyList[node] = new List<T>();
+            keys.Add(node);
         }
+    }
+    public void RemoveNode(T node)
+    {
+        RemoveFromNeighbors(node);
+        adjacencyList.Remove(node);
+        keys.Remove(node);
     }
     /// <summary>
     /// Creates a connection between two nodes, making them neighbors
@@ -28,9 +36,10 @@ public class Graph<T>
             Debug.Log("from room does not exist in the graph.");
             return;
         }
-        adjacencyList[fromNode].Add(toNode);
+        
+        if (!adjacencyList[fromNode].Contains(toNode)) adjacencyList[fromNode].Add(toNode);
 
-        if (adjacencyList.ContainsKey(toNode)) adjacencyList[toNode].Add(fromNode);
+        if (adjacencyList.ContainsKey(toNode) && !adjacencyList[toNode].Contains(fromNode)) adjacencyList[toNode].Add(fromNode);
     }
     /// <summary>
     /// Returns a list of all neighboring nodes
@@ -55,11 +64,15 @@ public class Graph<T>
     /// <param name="nodeToRemove"></param>
     public void RemoveFromNeighbors(T nodeToRemove)
     {
+        if (adjacencyList.Keys.Count == 0) return;
         foreach (T key in adjacencyList.Keys)
         {
             if (adjacencyList[key].Contains(nodeToRemove)) adjacencyList[key].Remove(nodeToRemove);
         }
     }
+    /// <summary>
+    /// Removes all neighbors in adjacencylist
+    /// </summary>
     public void ClearNeighbors()
     {
         foreach (T key in adjacencyList.Keys) adjacencyList[key].Clear();
@@ -83,11 +96,7 @@ public class Graph<T>
     /// <returns></returns>
     public List<T> KeysToList()
     {
-        List<T> list = new List<T>();
-
-        foreach (T key in adjacencyList.Keys) list.Add(key);
-
-        return list;
+        return keys;
     }
     /// <summary>
     /// Uses Depth First Searching to create a spanning tree without loops. Requires connections to already exist

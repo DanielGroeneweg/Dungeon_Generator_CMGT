@@ -86,7 +86,7 @@ public class DungeonGenerator : MonoBehaviour
         // go through the list of rooms splitAmount times
         while (changedARoom)
         {
-            List<Room> unfinishedRooms = new List<Room>(rooms.adjacencyList.Keys);
+            List<Room> unfinishedRooms = rooms.KeysToList();
             changedARoom = false;
 
             for (int i = unfinishedRooms.Count - 1; i >= 0; i--)
@@ -165,7 +165,7 @@ public class DungeonGenerator : MonoBehaviour
         rooms.AddNode(roomObjectBottom);
 
         // Remove the original room from the room list
-        rooms.adjacencyList.Remove(roomObject);
+        rooms.RemoveNode(roomObject);
     }
     /// <summary>
     /// Split room vertically (reduce the x/width)
@@ -199,11 +199,15 @@ public class DungeonGenerator : MonoBehaviour
         rooms.AddNode(roomObjectRight);
 
         // Remove the original room from the room list
-        rooms.adjacencyList.Remove(roomObject);
+        rooms.RemoveNode(roomObject);
     }
     #endregion
 
     #region ConnectionFinding
+    /// <summary>
+    /// Makes all rooms that overlap and could place a door be eachothers neighbors
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator FindConnections()
     {
         List<Room> list = rooms.KeysToList();
@@ -236,7 +240,7 @@ public class DungeonGenerator : MonoBehaviour
         float roomCountAtStart = rooms.adjacencyList.Count;
         float percentageRemoved = 1f - rooms.adjacencyList.Count / roomCountAtStart;
 
-        List<Room> roomList = new List<Room>(rooms.adjacencyList.Keys);
+        List<Room> roomList = rooms.KeysToList();
 
         // Sort the list
         if (roomSizeToBeRemoved == Sizes.Smallest)
@@ -250,13 +254,18 @@ public class DungeonGenerator : MonoBehaviour
         {
             // Remove first room in the sorted list
             Room roomToBeDestroyed = roomList[0];
+
+            List<Room> neighbors = rooms.GetNeighbors(roomToBeDestroyed);
+
+            rooms.RemoveNode(roomToBeDestroyed);
+
             roomList.Remove(roomToBeDestroyed);
+
+            Debug.Log("Checking!");
 
             if (AllRoomsAreConnected(roomList))
             {
-                rooms.RemoveFromNeighbors(roomToBeDestroyed);
                 removedRooms.Add(roomToBeDestroyed);
-                rooms.adjacencyList.Remove(roomToBeDestroyed);
 
                 // Handle the percentage
                 percentageRemoved = 1f - rooms.adjacencyList.Count / roomCountAtStart;
@@ -264,6 +273,11 @@ public class DungeonGenerator : MonoBehaviour
 
             else
             {
+                rooms.AddNode(roomToBeDestroyed);
+                for (int i = neighbors.Count - 1; i >= 0; i++)
+                {
+                    rooms.AddNeighbor(roomToBeDestroyed, neighbors[i]);
+                }
                 break;
             }
 
@@ -271,12 +285,14 @@ public class DungeonGenerator : MonoBehaviour
             yield return new WaitForSeconds(timeBetweenSteps);
         }
 
+        Debug.Log("End");
         finishedRemoval = true;
         StopCoroutine(RemoveSmallestRooms());
     }
     private List<Room> SortRoomsBySize(List<Room> list, SortingOrders sortingOrder)
     {
-        List<Room> sortedList = new List<Room>();
+        List<Room> sortedList = list;
+        sortedList.Clear();
 
         // Complexity: (O(n^2))
         foreach (Room room in list)
@@ -311,10 +327,10 @@ public class DungeonGenerator : MonoBehaviour
 
         return sortedList;
     }
+    int hello = 0;
     private bool AllRoomsAreConnected(List<Room> list)
     {
         bool allConnected = true;
-
         // Reset rooms in list
         for (int r = 0; r < list.Count; r++)
         {
@@ -346,6 +362,9 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
 
+        hello++;
+        Debug.Log(hello);
+
         // Complexity: (O(n))
         foreach (Room room in list)
         {
@@ -360,7 +379,7 @@ public class DungeonGenerator : MonoBehaviour
     #region PathGeneration
     private IEnumerator GeneratePath()
     {
-        //rooms.DFS(rooms.adjacencyList.Keys.First());
+        rooms.DFS(rooms.adjacencyList.Keys.First());
         yield return new WaitForSeconds(timeBetweenSteps);
 
         finishedPathing = true;
@@ -458,6 +477,25 @@ public class DungeonGenerator : MonoBehaviour
 
         // Draw dungeon in dark green
         if (showDungeonOutLine) AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
+
+        // Create node lines:
+        foreach(Room room in rooms.KeysToList())
+        {
+            foreach(Room neighbor in rooms.GetNeighbors(room))
+            {
+                Vector3 roomPos;
+                roomPos.x = room.area.x + room.area.width / 2f;
+                roomPos.y = 0.1f;
+                roomPos.z = room.area.y + room.area.height / 2f;
+
+                Vector3 neighborPos;
+                neighborPos.x = neighbor.area.x + neighbor.area.width / 2f;
+                neighborPos.y = 0.1f;
+                neighborPos.z = neighbor.area.y + neighbor.area.height / 2f;
+
+                Debug.DrawLine(roomPos, neighborPos, Color.red);
+            }
+        }
     }
     #endregion
 
@@ -476,22 +514,28 @@ public class DungeonGenerator : MonoBehaviour
 
         // Find all connections in rooms
         yield return new WaitUntil(() => finishedSplitting);
+        Debug.Log("Finished Splitting");
         StartCoroutine(FindConnections());
 
         // Remove random rooms from the dungeon
         yield return new WaitUntil(() => finishedFindingConnections);
-        StartCoroutine(RemoveSmallestRooms());
+        Debug.Log("Finished Finding Connections");
+        //StartCoroutine(RemoveSmallestRooms());
+        finishedRemoval = true;
 
         // Generate a path through the dungeon
         yield return new WaitUntil(() => finishedRemoval);
+        Debug.Log("Finished Removal");
         StartCoroutine(GeneratePath());
 
         // Create doors to connect rooms to eachother
         yield return new WaitUntil(() => finishedPathing);
+        Debug.Log("Finished path creation");
         StartCoroutine(GenerateDoors());
 
         // Stop the coroutine
         yield return new WaitUntil(() => finishedDoors);
+        Debug.Log("Finished Doors");
         StopCoroutine(DungeonGeneration());
     }
     private void ResetDungeon()
