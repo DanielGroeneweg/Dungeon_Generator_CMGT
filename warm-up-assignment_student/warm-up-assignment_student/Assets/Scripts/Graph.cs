@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,8 +41,6 @@ public class Graph<T>
         if (!adjacencyList[fromNode].Contains(toNode)) adjacencyList[fromNode].Add(toNode);
 
         if (adjacencyList.ContainsKey(toNode) && !adjacencyList[toNode].Contains(fromNode)) adjacencyList[toNode].Add(fromNode);
-
-
     }
     /// <summary>
     /// Returns a list of all neighboring nodes

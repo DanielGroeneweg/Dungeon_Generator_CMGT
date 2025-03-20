@@ -130,7 +130,6 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         finishedSplitting = true;
-        StopCoroutine(SplitRooms());
     }
     /// <summary>
     /// Split room horizontally (reduce the y/height)
@@ -228,7 +227,6 @@ public class DungeonGenerator : MonoBehaviour
         }
         yield return new WaitForSeconds(timeBetweenSteps);
         finishedFindingConnections = true;
-        StopCoroutine(FindConnections());
     }
     #endregion
 
@@ -282,7 +280,6 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         finishedRemoval = true;
-        StopCoroutine(RemoveSmallestRooms());
     }
     private List<Room> SortRoomsBySize(List<Room> list, SortingOrders sortingOrder)
     {
@@ -346,13 +343,10 @@ public class DungeonGenerator : MonoBehaviour
     #endregion
 
     #region PathGeneration
-    private IEnumerator GeneratePath()
+    private void GeneratePath()
     {
         rooms.DFS(rooms.adjacencyList.Keys.First());
-        yield return new WaitForSeconds(timeBetweenSteps);
-
         finishedPathing = true;
-        StopCoroutine(GeneratePath());
     }
     #endregion
 
@@ -409,7 +403,6 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
         finishedDoors = true;
-        StopCoroutine(GenerateDoors());
     }
     #endregion
 
@@ -491,7 +484,7 @@ public class DungeonGenerator : MonoBehaviour
 
         // Generate a path through the dungeon
         yield return new WaitUntil(() => finishedRemoval);
-        StartCoroutine(GeneratePath());
+        GeneratePath();
 
         // Create doors to connect rooms to eachother
         yield return new WaitUntil(() => finishedPathing);
@@ -499,7 +492,6 @@ public class DungeonGenerator : MonoBehaviour
 
         // Stop the coroutine
         yield return new WaitUntil(() => finishedDoors);
-        StopCoroutine(DungeonGeneration());
     }
     private void ResetDungeon()
     {
