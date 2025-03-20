@@ -5,7 +5,6 @@ using System;
 using UnityEngine.UIElements;
 using System.Collections;
 using System.Linq;
-using NUnit.Framework;
 using RangeAttribute = UnityEngine.RangeAttribute;
 public class DungeonGenerator : MonoBehaviour
 {
@@ -227,7 +226,6 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
-
         yield return new WaitForSeconds(timeBetweenSteps);
         finishedFindingConnections = true;
         StopCoroutine(FindConnections());
@@ -261,8 +259,6 @@ public class DungeonGenerator : MonoBehaviour
 
             roomList.Remove(roomToBeDestroyed);
 
-            Debug.Log("Checking!");
-
             if (AllRoomsAreConnected(roomList))
             {
                 removedRooms.Add(roomToBeDestroyed);
@@ -274,7 +270,7 @@ public class DungeonGenerator : MonoBehaviour
             else
             {
                 rooms.AddNode(roomToBeDestroyed);
-                for (int i = neighbors.Count - 1; i >= 0; i++)
+                for (int i = neighbors.Count - 1; i >= 0; i--)
                 {
                     rooms.AddNeighbor(roomToBeDestroyed, neighbors[i]);
                 }
@@ -285,14 +281,12 @@ public class DungeonGenerator : MonoBehaviour
             yield return new WaitForSeconds(timeBetweenSteps);
         }
 
-        Debug.Log("End");
         finishedRemoval = true;
         StopCoroutine(RemoveSmallestRooms());
     }
     private List<Room> SortRoomsBySize(List<Room> list, SortingOrders sortingOrder)
     {
-        List<Room> sortedList = list;
-        sortedList.Clear();
+        List<Room> sortedList = new List<Room>();
 
         // Complexity: (O(n^2))
         foreach (Room room in list)
@@ -327,7 +321,6 @@ public class DungeonGenerator : MonoBehaviour
 
         return sortedList;
     }
-    int hello = 0;
     private bool AllRoomsAreConnected(List<Room> list)
     {
         bool allConnected = true;
@@ -361,9 +354,6 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
-
-        hello++;
-        Debug.Log(hello);
 
         // Complexity: (O(n))
         foreach (Room room in list)
@@ -514,28 +504,22 @@ public class DungeonGenerator : MonoBehaviour
 
         // Find all connections in rooms
         yield return new WaitUntil(() => finishedSplitting);
-        Debug.Log("Finished Splitting");
         StartCoroutine(FindConnections());
 
         // Remove random rooms from the dungeon
         yield return new WaitUntil(() => finishedFindingConnections);
-        Debug.Log("Finished Finding Connections");
-        //StartCoroutine(RemoveSmallestRooms());
-        finishedRemoval = true;
+        StartCoroutine(RemoveSmallestRooms());
 
         // Generate a path through the dungeon
         yield return new WaitUntil(() => finishedRemoval);
-        Debug.Log("Finished Removal");
         StartCoroutine(GeneratePath());
 
         // Create doors to connect rooms to eachother
         yield return new WaitUntil(() => finishedPathing);
-        Debug.Log("Finished path creation");
         StartCoroutine(GenerateDoors());
 
         // Stop the coroutine
         yield return new WaitUntil(() => finishedDoors);
-        Debug.Log("Finished Doors");
         StopCoroutine(DungeonGeneration());
     }
     private void ResetDungeon()

@@ -36,10 +36,12 @@ public class Graph<T>
             Debug.Log("from room does not exist in the graph.");
             return;
         }
-        
+
         if (!adjacencyList[fromNode].Contains(toNode)) adjacencyList[fromNode].Add(toNode);
 
         if (adjacencyList.ContainsKey(toNode) && !adjacencyList[toNode].Contains(fromNode)) adjacencyList[toNode].Add(fromNode);
+
+
     }
     /// <summary>
     /// Returns a list of all neighboring nodes
@@ -121,9 +123,8 @@ public class Graph<T>
                 foreach (T neighbor in GetNeighbors(node))
                 {
                     stack.Push(neighbor);
-
-                    if (!nodeCameFrom.ContainsKey(neighbor)) nodeCameFrom.Add(neighbor, node);
-                    else nodeCameFrom[neighbor] = node;
+                    
+                    if (!discovered.Contains(neighbor)) nodeCameFrom[neighbor] = node;
                 }
             }
         }
@@ -132,7 +133,7 @@ public class Graph<T>
 
         foreach (T key in nodeCameFrom.Keys)
         {
-            if (!adjacencyList[key].Contains(nodeCameFrom[key])) AddNeighbor(key, nodeCameFrom[key]);
+            AddNeighbor(key, nodeCameFrom[key]);
         }
     }
 }
