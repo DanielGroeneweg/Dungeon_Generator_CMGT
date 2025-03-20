@@ -34,13 +34,19 @@ public class Graph<T>
     {
         if (!adjacencyList.ContainsKey(fromNode))
         {
-            Debug.Log("from room does not exist in the graph.");
+            Debug.Log("from node does not exist in the graph.");
             return;
         }
 
         if (!adjacencyList[fromNode].Contains(toNode)) adjacencyList[fromNode].Add(toNode);
 
-        if (adjacencyList.ContainsKey(toNode) && !adjacencyList[toNode].Contains(fromNode)) adjacencyList[toNode].Add(fromNode);
+        if (!adjacencyList.ContainsKey(toNode))
+        {
+            //Debug.Log("to node does not exist in the graph.");
+            return;
+        }
+
+        if (!adjacencyList[toNode].Contains(fromNode)) adjacencyList[toNode].Add(fromNode);
     }
     /// <summary>
     /// Returns a list of all neighboring nodes
@@ -51,13 +57,32 @@ public class Graph<T>
     {
         if (!adjacencyList.ContainsKey(node))
         {
-            Debug.Log("Room does not exist in the graph.");
+            Debug.Log("Node does not exist in the graph.");
         }
         return adjacencyList[node];
     }
-    public int GetNeighborCount(T node)
+    /// <summary>
+    /// Removes a connection between two given nodes
+    /// </summary>
+    /// <param name="fromNode"></param>
+    /// <param name="toNode"></param>
+    public void RemoveNeighbor(T fromNode, T toNode)
     {
-        return adjacencyList[node].Count;
+        if (!adjacencyList.ContainsKey(fromNode))
+        {
+            Debug.Log("from node does not exist in the graph.");
+            return;
+        }
+
+        if (!adjacencyList.ContainsKey(toNode))
+        {
+            Debug.Log("to node does not exist in the graph.");
+            return;
+        }
+
+        if (adjacencyList[fromNode].Contains(toNode)) adjacencyList[fromNode].Remove(toNode);
+
+        if (adjacencyList[toNode].Contains(fromNode)) adjacencyList[toNode].Remove(fromNode);
     }
     /// <summary>
     /// Removes a node as neighbor from all other nodes
@@ -88,7 +113,7 @@ public class Graph<T>
                 neighbors += ", " + neighbor;
             }
 
-            Debug.Log(key + " has " + GetNeighborCount(key) + " neighbors: " + neighbors);
+            Debug.Log(key + " has " + adjacencyList[key].Count + " neighbors: " + neighbors);
         }
     }
     /// <summary>
