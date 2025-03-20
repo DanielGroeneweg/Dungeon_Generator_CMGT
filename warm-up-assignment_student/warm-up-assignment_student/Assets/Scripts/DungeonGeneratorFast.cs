@@ -40,9 +40,8 @@ public class DungeonGeneratorFast : MonoBehaviour
     public class Room
     {
         public RectInt area;
-        public bool isConnectedToDungeon = false;
-        public bool hasDoorsPlaced = false;
         public int size;
+        public bool isDoor = false;
     }
     public Graph<Room> rooms;
     public Graph<Room> doors;
@@ -276,17 +275,12 @@ public class DungeonGeneratorFast : MonoBehaviour
     }
     private bool AllRoomsAreConnected(List<Room> list)
     {
-        bool allConnected = true;
-        // Reset rooms in list
-        for (int r = 0; r < list.Count; r++)
-        {
-            list[r].isConnectedToDungeon = false;
-        }
+        HashSet<Room> discovered = new HashSet<Room>();
 
         bool foundConnectedRooms = true;
 
         // Set the first to true
-        list[0].isConnectedToDungeon = true;
+        discovered.Add(list[0]);
 
         // Keep looping through the list of rooms until no 'new' connected rooms are found
         while (foundConnectedRooms)
@@ -298,11 +292,11 @@ public class DungeonGeneratorFast : MonoBehaviour
             {
                 foreach (Room neighbor in rooms.GetNeighbors(room))
                 {
-                    if (room.isConnectedToDungeon != neighbor.isConnectedToDungeon)
+                    if (discovered.Contains(room) != discovered.Contains(neighbor))
                     {
                         foundConnectedRooms = true;
-                        neighbor.isConnectedToDungeon = true;
-                        room.isConnectedToDungeon = true;
+                        if (!discovered.Contains(room)) discovered.Add(room);
+                        if (!discovered.Contains(neighbor)) discovered.Add(neighbor);
                     }
                 }
             }
@@ -312,10 +306,13 @@ public class DungeonGeneratorFast : MonoBehaviour
         foreach (Room room in list)
         {
             // If one room is not connected the dungeon is 'split' in 2
-            if (!room.isConnectedToDungeon) allConnected = false;
+            if (!discovered.Contains(room))
+            {
+                return false;
+            }
         }
 
-        return allConnected;
+        return true;
     }
     #endregion
 
@@ -329,7 +326,8 @@ public class DungeonGeneratorFast : MonoBehaviour
     #region DoorGenerating
     private void GenerateDoors()
     {
-        rooms.adjacencyList.Keys.First().hasDoorsPlaced = true;
+        HashSet<Room> discovered = new HashSet<Room>();
+        discovered.Add(rooms.adjacencyList.Keys.First());
         bool placedDoors = true;
 
         // Go through the list of rooms until all rooms have a door
@@ -341,35 +339,71 @@ public class DungeonGeneratorFast : MonoBehaviour
             // Complexity: (O(n^2))
             foreach (Room room in rooms.adjacencyList.Keys)
             {
-                foreach (Room neighbor in rooms.GetNeighbors(room))
+                for (int i = rooms.adjacencyList[room].Count - 1; i >= 0; i--)
                 {
+                    List<Room> neighbors = rooms.adjacencyList[room];
+                    Room neighbor = neighbors[i];
                     // if ONE of the rooms has no doors yet and the rooms are next to eachother, place a door at a random location
-                    if (room.hasDoorsPlaced != neighbor.hasDoorsPlaced)
+                    if (discovered.Contains(room) != discovered.Contains(neighbor) && !neighbor.isDoor)
                     {
                         RectInt intersection = AlgorithmsUtils.Intersect(room.area, neighbor.area);
                         if (intersection.width > intersection.height)
                         {
+                            // Create door
                             int pos = random.Next(intersection.xMin + wallBuffer, intersection.xMax - wallBuffer - doorSize + 1);
                             Room door = new Room();
                             door.area = new RectInt(pos, intersection.y, doorSize, intersection.height);
+                            door.isDoor = true;
+
+                            // Add door to list and as neighbors from rooms
                             doors.AddNode(door);
+
                             doors.AddNeighbor(door, room);
                             doors.AddNeighbor(door, neighbor);
-                            room.hasDoorsPlaced = true;
-                            neighbor.hasDoorsPlaced = true;
+
+                            rooms.AddNeighbor(room, door);
+                            rooms.AddNeighbor(neighbor, door);
+
+                            // Remove the connection from room to room
+                            rooms.RemoveNeighbor(room, neighbor);
+                            rooms.RemoveNeighbor(neighbor, room);
+
+                            // Add to discovered
+                            if (!discovered.Contains(room)) discovered.Add(room);
+                            if (!discovered.Contains(neighbor)) discovered.Add(neighbor);
+
+                            discovered.Add(door);
+
                             placedDoors = true;
                         }
 
                         else
                         {
+                            // Create door
                             int pos = random.Next(intersection.yMin + wallBuffer, intersection.yMax - wallBuffer - doorSize + 1);
                             Room door = new Room();
                             door.area = new RectInt(intersection.x, pos, intersection.width, doorSize);
+                            door.isDoor = true;
+
+                            // Add door to list and as neighbors from rooms
                             doors.AddNode(door);
                             doors.AddNeighbor(door, room);
                             doors.AddNeighbor(door, neighbor);
-                            room.hasDoorsPlaced = true;
-                            neighbor.hasDoorsPlaced = true;
+
+                            // Remove the connection from room to room
+                            rooms.AddNeighbor(room, door);
+                            rooms.AddNeighbor(neighbor, door);
+
+                            // Remove the connection from room to room
+                            rooms.RemoveNeighbor(room, neighbor);
+                            rooms.RemoveNeighbor(neighbor, room);
+
+                            // Add to discovered
+                            if (!discovered.Contains(room)) discovered.Add(room);
+                            if (!discovered.Contains(neighbor)) discovered.Add(neighbor);
+
+                            discovered.Add(door);
+
                             placedDoors = true;
                         }
                     }
@@ -387,8 +421,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         {
             foreach (Room room in rooms.adjacencyList.Keys)
             {
-                if (room.hasDoorsPlaced) AlgorithmsUtils.DebugRectInt(room.area, Color.green);
-                else AlgorithmsUtils.DebugRectInt(room.area, Color.cyan);
+                AlgorithmsUtils.DebugRectInt(room.area, Color.green);
             }
         }
 
