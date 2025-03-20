@@ -286,39 +286,18 @@ public class DungeonGenerator : MonoBehaviour
     }
     private List<Room> SortRoomsBySize(List<Room> list, SortingOrders sortingOrder)
     {
-        List<Room> sortedList = new List<Room>();
-
-        // Complexity: (O(n^2))
-        foreach (Room room in list)
+        List<Room> sortedList = list;
+        switch(sortingOrder)
         {
-            if (sortedList.Count == 0) sortedList.Add(room);
-
-            else
-            {
-                // complexity: (O(n))
-                for (int i = 0; i < sortedList.Count; i++)
-                {
-                    if (sortingOrder == SortingOrders.SmallestToBiggest && room.size < sortedList[i].size)
-                    {
-                        sortedList.Insert(i, room);
-                        break;
-                    }
-
-                    else if (sortingOrder == SortingOrders.BiggestToSmallest && room.size > sortedList[i].size)
-                    {
-                        sortedList.Insert(i, room);
-                        break;
-                    }
-
-                    else if (i == sortedList.Count - 1)
-                    {
-                        sortedList.Add(room);
-                        break;
-                    }
-                }
-            }
+            case SortingOrders.SmallestToBiggest:
+                // Complexity: O(n log n)
+                sortedList = sortedList.OrderBy(t => t.size).ToList<Room>();
+                break;
+            case SortingOrders.BiggestToSmallest:
+                // Complexity: O(n log n)
+                sortedList = sortedList.OrderByDescending(t => t.size).ToList<Room>();
+                break;
         }
-
         return sortedList;
     }
     private bool AllRoomsAreConnected(List<Room> list)
