@@ -11,6 +11,7 @@ public class DungeonGenerator : MonoBehaviour
     #region variables
     [Header("Generation Method")]
     [SerializeField] private float timeBetweenSteps = 0.1f;
+    [SerializeField] private bool randomPathing = false;
 
     [Header("Seed")]
     [SerializeField] private bool useSeed = false;
@@ -342,7 +343,7 @@ public class DungeonGenerator : MonoBehaviour
     #region PathGeneration
     private void GeneratePath()
     {
-        rooms.DFS(rooms.adjacencyList.Keys.First());
+        rooms.DFS(rooms.adjacencyList.Keys.First(), randomPathing, random);
         finishedPathing = true;
     }
     #endregion

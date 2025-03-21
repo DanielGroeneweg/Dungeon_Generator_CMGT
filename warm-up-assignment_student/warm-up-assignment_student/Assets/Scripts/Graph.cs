@@ -128,7 +128,7 @@ public class Graph<T>
     /// Uses Depth First Searching to create a spanning tree without loops. Requires connections to already exist
     /// </summary>
     /// <param name="node"></param>
-    public void DFS(T node)
+    public void DFS(T node, bool random, System.Random seed)
     {
         HashSet<T> discovered = new HashSet<T>();
         Stack<T> stack = new Stack<T>();
@@ -144,12 +144,17 @@ public class Graph<T>
             if (!discovered.Contains(node))
             {
                 discovered.Add(node);
-                foreach (T neighbor in GetNeighbors(node))
+                List<T> neighbors = GetNeighbors(node);
+                for (int i = neighbors.Count - 1; i >= 0; i--)
                 {
+                    T neighbor = neighbors[i];
+                    if (random) neighbor = neighbors[seed.Next(0, neighbors.Count)];
+
                     stack.Push(neighbor);
-                    
                     if (!discovered.Contains(neighbor)) nodeCameFrom[neighbor] = node;
+                    neighbors.Remove(neighbor);
                 }
+                
             }
         }
 

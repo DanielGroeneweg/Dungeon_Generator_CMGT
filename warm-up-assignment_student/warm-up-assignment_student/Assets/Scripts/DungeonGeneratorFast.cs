@@ -9,6 +9,9 @@ using RangeAttribute = UnityEngine.RangeAttribute;
 public class DungeonGeneratorFast : MonoBehaviour
 {
     #region variables
+    [Header("Generation Method")]
+    [SerializeField] private bool randomPathing = false;
+
     [Header("Seed")]
     [SerializeField] private bool useSeed = false;
     [ShowIf("useSeed")][SerializeField] private int seed = 1;
@@ -319,7 +322,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     #region PathGeneration
     private void GeneratePath()
     {
-        rooms.DFS(rooms.adjacencyList.Keys.First());
+        rooms.DFS(rooms.adjacencyList.Keys.First(), randomPathing, random);
     }
     #endregion
 

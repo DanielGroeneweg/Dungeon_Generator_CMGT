@@ -407,6 +407,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeBetweenSteps: 0
+  randomPathing: 1
   useSeed: 0
   seed: 185291640
   dungeonWidth: 1000
@@ -415,7 +416,7 @@ MonoBehaviour:
   roomMinHeight: 100
   wallBuffer: 2
   doorSize: 6
-  percentageOfRoomsToRemove: 0.4
+  percentageOfRoomsToRemove: 0.1
   roomSizeToBeRemoved: 0
   showRooms: 1
   showDoors: 1
@@ -529,6 +530,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b1d72f3b1a8e7844b6899a262d4f0e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  randomPathing: 1
   useSeed: 0
   seed: 1
   dungeonWidth: 1000
@@ -537,7 +539,7 @@ MonoBehaviour:
   roomMinHeight: 100
   wallBuffer: 2
   doorSize: 6
-  percentageOfRoomsToRemove: 0.4
+  percentageOfRoomsToRemove: 0.1
   roomSizeToBeRemoved: 0
   showRooms: 1
   showDoors: 1
