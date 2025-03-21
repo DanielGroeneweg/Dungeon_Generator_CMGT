@@ -11,6 +11,8 @@ public class DungeonGeneratorFast : MonoBehaviour
     #region variables
     [Header("Generation Method")]
     [SerializeField] private bool randomPathing = false;
+    public enum PathSearchingMethods { DepthFirst, BreadthFirst }
+    [SerializeField] private PathSearchingMethods pathSearchingMethod = PathSearchingMethods.DepthFirst;
 
     [Header("Seed")]
     [SerializeField] private bool useSeed = false;
@@ -38,6 +40,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     [SerializeField] private bool showDoors = true;
     [SerializeField] private bool showDungeonOutLine = true;
     [SerializeField] private bool showRemovedRooms = true;
+    [SerializeField] private bool showGraph = true;
 
     // Not in inspector
     public class Room
@@ -322,7 +325,15 @@ public class DungeonGeneratorFast : MonoBehaviour
     #region PathGeneration
     private void GeneratePath()
     {
-        rooms.DFS(rooms.adjacencyList.Keys.First(), randomPathing, random);
+        switch (pathSearchingMethod)
+        {
+            case PathSearchingMethods.DepthFirst:
+                rooms.DFS(rooms.adjacencyList.Keys.First(), randomPathing, random);
+                break;
+            case PathSearchingMethods.BreadthFirst:
+                rooms.BFS(rooms.adjacencyList.Keys.First());
+                break;
+        }
     }
     #endregion
 
@@ -450,21 +461,24 @@ public class DungeonGeneratorFast : MonoBehaviour
         if (showDungeonOutLine) AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
 
         // Create node lines:
-        foreach(Room room in rooms.KeysToList())
+        if (showGraph)
         {
-            foreach(Room neighbor in rooms.GetNeighbors(room))
+            foreach (Room room in rooms.KeysToList())
             {
-                Vector3 roomPos;
-                roomPos.x = room.area.x + room.area.width / 2f;
-                roomPos.y = 0.1f;
-                roomPos.z = room.area.y + room.area.height / 2f;
+                foreach (Room neighbor in rooms.GetNeighbors(room))
+                {
+                    Vector3 roomPos;
+                    roomPos.x = room.area.x + room.area.width / 2f;
+                    roomPos.y = 0.1f;
+                    roomPos.z = room.area.y + room.area.height / 2f;
 
-                Vector3 neighborPos;
-                neighborPos.x = neighbor.area.x + neighbor.area.width / 2f;
-                neighborPos.y = 0.1f;
-                neighborPos.z = neighbor.area.y + neighbor.area.height / 2f;
+                    Vector3 neighborPos;
+                    neighborPos.x = neighbor.area.x + neighbor.area.width / 2f;
+                    neighborPos.y = 0.1f;
+                    neighborPos.z = neighbor.area.y + neighbor.area.height / 2f;
 
-                Debug.DrawLine(roomPos, neighborPos, Color.red);
+                    Debug.DrawLine(roomPos, neighborPos, Color.red);
+                }
             }
         }
     }

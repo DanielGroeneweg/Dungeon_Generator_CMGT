@@ -408,6 +408,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeBetweenSteps: 0
   randomPathing: 1
+  pathSearchingMethod: 1
   useSeed: 0
   seed: 185291640
   dungeonWidth: 1000
@@ -422,6 +423,7 @@ MonoBehaviour:
   showDoors: 1
   showDungeonOutLine: 1
   showRemovedRooms: 0
+  showGraph: 1
 --- !u!4 &563225899
 Transform:
   m_ObjectHideFlags: 0
@@ -531,6 +533,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   randomPathing: 1
+  pathSearchingMethod: 0
   useSeed: 0
   seed: 1
   dungeonWidth: 1000
@@ -545,6 +548,7 @@ MonoBehaviour:
   showDoors: 1
   showDungeonOutLine: 1
   showRemovedRooms: 0
+  showGraph: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

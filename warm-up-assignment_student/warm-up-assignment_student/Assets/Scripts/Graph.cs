@@ -165,4 +165,42 @@ public class Graph<T>
             AddNeighbor(key, nodeCameFrom[key]);
         }
     }
+    /// <summary>
+    /// Uses Breadth First Searching to create a spanning tree without loops. Requires connections to already exist
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="random"></param>
+    /// <param name="seed"></param>
+    public void BFS(T node)
+    {
+        HashSet<T> discovered = new HashSet<T>();
+        Queue<T> queue = new Queue<T>();
+
+        queue.Enqueue(node);
+
+        Dictionary<T, T> nodeCameFrom = new Dictionary<T, T>();
+
+        while (queue.Count > 0)
+        {
+            node = queue.Dequeue();
+
+            if (!discovered.Contains(node))
+            {
+                discovered.Add(node);
+
+                foreach (T neighbor in GetNeighbors(node))
+                {
+                    queue.Enqueue(neighbor);
+                    if (!discovered.Contains(neighbor)) nodeCameFrom[neighbor] = node;
+                }
+            }
+        }
+
+        ClearNeighbors();
+
+        foreach (T key in nodeCameFrom.Keys)
+        {
+            AddNeighbor(key, nodeCameFrom[key]);
+        }
+    }
 }
