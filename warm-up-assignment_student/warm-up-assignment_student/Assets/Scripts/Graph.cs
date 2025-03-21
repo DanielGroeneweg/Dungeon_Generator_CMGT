@@ -190,8 +190,11 @@ public class Graph<T>
 
                 foreach (T neighbor in GetNeighbors(node))
                 {
-                    queue.Enqueue(neighbor);
-                    if (!discovered.Contains(neighbor)) nodeCameFrom[neighbor] = node;
+                    if (!discovered.Contains(neighbor))
+                    {
+                        queue.Enqueue(neighbor);
+                        nodeCameFrom[neighbor] = node;
+                    }
                 }
             }
         }

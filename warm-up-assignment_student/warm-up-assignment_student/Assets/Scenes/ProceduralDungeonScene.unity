@@ -408,7 +408,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeBetweenSteps: 0
   randomPathing: 1
-  pathSearchingMethod: 1
+  pathSearchingMethod: 0
   useSeed: 0
   seed: 185291640
   dungeonWidth: 1000
