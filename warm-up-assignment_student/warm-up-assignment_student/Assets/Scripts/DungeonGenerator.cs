@@ -464,27 +464,6 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
 
-        if (showDoors)
-        {
-            // Draw doors in blue
-            foreach (Room door in doors.adjacencyList.Keys)
-            {
-                AlgorithmsUtils.DebugRectInt(door.area, Color.blue);
-            }
-        }
-
-        if (showRemovedRooms)
-        {
-            // Draw random removed rooms in red
-            foreach (Room room in removedRooms)
-            {
-                AlgorithmsUtils.DebugRectInt(room.area, Color.red);
-            }
-        }
-
-        // Draw dungeon in dark green
-        if (showDungeonOutLine) AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
-
         // Create node lines:
         if (showGraph)
         {
@@ -506,6 +485,27 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
+
+        if (showDoors)
+        {
+            // Draw doors in blue
+            foreach (Room door in doors.adjacencyList.Keys)
+            {
+                AlgorithmsUtils.DebugRectInt(door.area, Color.blue);
+            }
+        }
+
+        if (showRemovedRooms)
+        {
+            // Draw random removed rooms in red
+            foreach (Room room in removedRooms)
+            {
+                AlgorithmsUtils.DebugRectInt(room.area, Color.red);
+            }
+        }
+
+        // Draw dungeon in dark green
+        if (showDungeonOutLine) AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
     }
     #endregion
 
