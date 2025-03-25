@@ -9,8 +9,6 @@ using RangeAttribute = UnityEngine.RangeAttribute;
 public class DungeonGeneratorFast : MonoBehaviour
 {
     #region variables
-    [Header("Generation Method")]
-    [SerializeField] private bool randomPathing = false;
     public enum PathSearchingMethods { DepthFirst, BreadthFirst }
     [SerializeField] private PathSearchingMethods pathSearchingMethod = PathSearchingMethods.DepthFirst;
 
@@ -328,7 +326,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         switch (pathSearchingMethod)
         {
             case PathSearchingMethods.DepthFirst:
-                rooms.DFS(rooms.adjacencyList.Keys.First(), randomPathing, random);
+                rooms.DFS(rooms.adjacencyList.Keys.First());
                 break;
             case PathSearchingMethods.BreadthFirst:
                 rooms.BFS(rooms.adjacencyList.Keys.First());
@@ -430,13 +428,15 @@ public class DungeonGeneratorFast : MonoBehaviour
     #region DungeonDrawing
     void Update()
     {
-        // Draw existing rooms in green
-        if (showRooms)
+        // Draw rooms
+        if (showRooms && rooms.adjacencyList.Count > 0)
         {
             foreach (Room room in rooms.adjacencyList.Keys)
             {
                 AlgorithmsUtils.DebugRectInt(room.area, Color.green);
             }
+
+            AlgorithmsUtils.DebugRectInt(rooms.adjacencyList.Keys.First().area, Color.cyan);
         }
 
         // Create node lines:

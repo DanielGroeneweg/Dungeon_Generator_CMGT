@@ -11,7 +11,6 @@ public class DungeonGenerator : MonoBehaviour
     #region variables
     [Header("Generation Method")]
     [SerializeField] private float timeBetweenSteps = 0.1f;
-    [SerializeField] private bool randomPathing = false;
     public enum PathSearchingMethods { DepthFirst, BreadthFirst }
     [SerializeField] private PathSearchingMethods pathSearchingMethod = PathSearchingMethods.DepthFirst;
 
@@ -349,7 +348,7 @@ public class DungeonGenerator : MonoBehaviour
         switch (pathSearchingMethod)
         {
             case PathSearchingMethods.DepthFirst:
-                rooms.DFS(rooms.adjacencyList.Keys.First(), randomPathing, random);
+                rooms.DFS(rooms.adjacencyList.Keys.First());
                 break;
             case PathSearchingMethods.BreadthFirst:
                 rooms.BFS(rooms.adjacencyList.Keys.First());
@@ -456,12 +455,14 @@ public class DungeonGenerator : MonoBehaviour
     void Update()
     {
         // Draw existing rooms in green
-        if (showRooms)
+        if (showRooms && rooms.adjacencyList.Count > 0)
         {
             foreach (Room room in rooms.adjacencyList.Keys)
             {
                 AlgorithmsUtils.DebugRectInt(room.area, Color.green);
             }
+
+            AlgorithmsUtils.DebugRectInt(rooms.adjacencyList.Keys.First().area, Color.cyan);
         }
 
         // Create node lines:
