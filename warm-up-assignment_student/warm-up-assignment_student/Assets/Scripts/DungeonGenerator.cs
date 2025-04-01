@@ -539,12 +539,15 @@ public class DungeonGenerator : MonoBehaviour
         yield return new WaitUntil(() => finishedPathing);
         StartCoroutine(GenerateDoors());
 
-        // Stop the coroutine
+        // Make the dungeon physical
         yield return new WaitUntil(() => finishedDoors);
+        GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().MakeDungeonPhysical(rooms, doors, timeBetweenSteps);
     }
     private void ResetDungeon()
     {
         StopAllCoroutines();
+
+        GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().ClearDungeon();
 
         // Reset bools
         finishedSplitting = false;

@@ -41,18 +41,12 @@ public class DungeonGeneratorFast : MonoBehaviour
     [SerializeField] private bool showGraph = true;
 
     // Not in inspector
-    public class Room
-    {
-        public RectInt area;
-        public int size;
-        public bool isDoor = false;
-    }
-    public Graph<Room> rooms;
-    public Graph<Room> doors;
-    private List<Room> removedRooms;
+    public Graph<DungeonGenerator.Room> rooms;
+    public Graph<DungeonGenerator.Room> doors;
+    private List<DungeonGenerator.Room> removedRooms;
 
     private RectInt dungeon;
-    private Room firstRoom;
+    private DungeonGenerator.Room firstRoom;
 
     // Random
     private System.Random random;
@@ -63,11 +57,11 @@ public class DungeonGeneratorFast : MonoBehaviour
     private void Start()
     {
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
-        firstRoom = new Room();
+        firstRoom = new DungeonGenerator.Room();
         firstRoom.area = new RectInt(0, 0, dungeonWidth, dungeonHeight);
-        rooms = new Graph<Room>();
-        doors = new Graph<Room>();
-        removedRooms = new List<Room>();
+        rooms = new Graph<DungeonGenerator.Room>();
+        doors = new Graph<DungeonGenerator.Room>();
+        removedRooms = new List<DungeonGenerator.Room>();
     }
 
     #region RoomSplitting
@@ -78,7 +72,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         // go through the list of rooms splitAmount times
         while (changedARoom)
         {
-            List<Room> unfinishedRooms = rooms.KeysToList();
+            List<DungeonGenerator.Room> unfinishedRooms = rooms.KeysToList();
             changedARoom = false;
 
             for (int i = unfinishedRooms.Count - 1; i >= 0; i--)
@@ -122,7 +116,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     /// Split room horizontally (reduce the y/height)
     /// </summary>
     /// <param name="roomObject"></param>
-    private void SplitHorizontally(Room roomObject)
+    private void SplitHorizontally(DungeonGenerator.Room roomObject)
     {
         // some casting to make the script readable
         RectInt room = roomObject.area;
@@ -136,12 +130,12 @@ public class DungeonGeneratorFast : MonoBehaviour
         RectInt roomBottom = new RectInt(room.x, room.y, room.width, randomSize);
 
         // Create a new Room object for the top room
-        Room roomObjectTop = new Room();
+        DungeonGenerator.Room roomObjectTop = new DungeonGenerator.Room();
         roomObjectTop.area = roomTop;
         roomObjectTop.size = roomTop.width * roomTop.height;
 
         // Create a new Room object for the bottom room
-        Room roomObjectBottom = new Room();
+        DungeonGenerator.Room roomObjectBottom = new DungeonGenerator.Room();
         roomObjectBottom.area = roomBottom;
         roomObjectBottom.size = roomBottom.width * roomBottom.height;
 
@@ -156,7 +150,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     /// Split room vertically (reduce the x/width)
     /// </summary>
     /// <param name="roomObject"></param>
-    private void SplitVertically(Room roomObject)
+    private void SplitVertically(DungeonGenerator.Room roomObject)
     {
         // some casting to make the script readable
         RectInt room = roomObject.area;
@@ -170,12 +164,12 @@ public class DungeonGeneratorFast : MonoBehaviour
         RectInt roomRight = new RectInt(room.x + randomSize - wallBuffer, room.y, restSize + wallBuffer, room.height);
 
         // Create a new Room object for the left room
-        Room roomObjectLeft = new Room();
+        DungeonGenerator.Room roomObjectLeft = new DungeonGenerator.Room();
         roomObjectLeft.area = roomLeft;
         roomObjectLeft.size = roomLeft.width * roomLeft.height;
 
         // Create a new Room object for the right room
-        Room roomObjectRight = new Room();
+        DungeonGenerator.Room roomObjectRight = new DungeonGenerator.Room();
         roomObjectRight.area = roomRight;
         roomObjectRight.size = roomRight.width * roomRight.height;
 
@@ -195,7 +189,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     /// <returns></returns>
     private void FindConnections()
     {
-        List<Room> list = rooms.KeysToList();
+        List<DungeonGenerator.Room> list = rooms.KeysToList();
 
         // Complexity: (O(n^2))
         for (int i = 0; i < list.Count; i++)
@@ -221,7 +215,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         float roomCountAtStart = rooms.adjacencyList.Count;
         float percentageRemoved = 1f - rooms.adjacencyList.Count / roomCountAtStart;
 
-        List<Room> roomList = rooms.KeysToList();
+        List<DungeonGenerator.Room> roomList = rooms.KeysToList();
 
         // Sort the list
         if (roomSizeToBeRemoved == Sizes.Smallest)
@@ -234,9 +228,9 @@ public class DungeonGeneratorFast : MonoBehaviour
         while (percentageRemoved < percentageOfRoomsToRemove)
         {
             // Remove first room in the sorted list
-            Room roomToBeDestroyed = roomList[0];
+            DungeonGenerator.Room roomToBeDestroyed = roomList[0];
 
-            List<Room> neighbors = rooms.GetNeighbors(roomToBeDestroyed);
+            List<DungeonGenerator.Room> neighbors = rooms.GetNeighbors(roomToBeDestroyed);
 
             rooms.RemoveNode(roomToBeDestroyed);
 
@@ -261,25 +255,25 @@ public class DungeonGeneratorFast : MonoBehaviour
             }
         }
     }
-    private List<Room> SortRoomsBySize(List<Room> list, SortingOrders sortingOrder)
+    private List<DungeonGenerator.Room> SortRoomsBySize(List<DungeonGenerator.Room> list, SortingOrders sortingOrder)
     {
-        List<Room> sortedList = list;
+        List<DungeonGenerator.Room> sortedList = list;
         switch(sortingOrder)
         {
             case SortingOrders.SmallestToBiggest:
                 // Complexity: O(n log n)
-                sortedList = sortedList.OrderBy(t => t.size).ToList<Room>();
+                sortedList = sortedList.OrderBy(t => t.size).ToList<DungeonGenerator.Room>();
                 break;
             case SortingOrders.BiggestToSmallest:
                 // Complexity: O(n log n)
-                sortedList = sortedList.OrderByDescending(t => t.size).ToList<Room>();
+                sortedList = sortedList.OrderByDescending(t => t.size).ToList<DungeonGenerator.Room>();
                 break;
         }
         return sortedList;
     }
-    private bool AllRoomsAreConnected(List<Room> list)
+    private bool AllRoomsAreConnected(List<DungeonGenerator.Room> list)
     {
-        HashSet<Room> discovered = new HashSet<Room>();
+        HashSet<DungeonGenerator.Room> discovered = new HashSet<DungeonGenerator.Room>();
 
         bool foundConnectedRooms = true;
 
@@ -292,9 +286,9 @@ public class DungeonGeneratorFast : MonoBehaviour
             foundConnectedRooms = false;
 
             // Complexity (O(n^2))
-            foreach (Room room in list)
+            foreach (DungeonGenerator.Room room in list)
             {
-                foreach (Room neighbor in rooms.GetNeighbors(room))
+                foreach (DungeonGenerator.Room neighbor in rooms.GetNeighbors(room))
                 {
                     if (discovered.Contains(room) != discovered.Contains(neighbor))
                     {
@@ -307,7 +301,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         }
 
         // Complexity: (O(n))
-        foreach (Room room in list)
+        foreach (DungeonGenerator.Room room in list)
         {
             // If one room is not connected the dungeon is 'split' in 2
             if (!discovered.Contains(room))
@@ -338,7 +332,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     #region DoorGenerating
     private void GenerateDoors()
     {
-        HashSet<Room> discovered = new HashSet<Room>();
+        HashSet<DungeonGenerator.Room> discovered = new HashSet<DungeonGenerator.Room>();
         discovered.Add(rooms.adjacencyList.Keys.First());
         bool placedDoors = true;
 
@@ -349,12 +343,12 @@ public class DungeonGeneratorFast : MonoBehaviour
 
             // For each room, check each neighboring room
             // Complexity: (O(n^2))
-            foreach (Room room in rooms.adjacencyList.Keys)
+            foreach (DungeonGenerator.Room room in rooms.adjacencyList.Keys)
             {
                 for (int i = rooms.adjacencyList[room].Count - 1; i >= 0; i--)
                 {
-                    List<Room> neighbors = rooms.adjacencyList[room];
-                    Room neighbor = neighbors[i];
+                    List<DungeonGenerator.Room> neighbors = rooms.adjacencyList[room];
+                    DungeonGenerator.Room neighbor = neighbors[i];
                     // if ONE of the rooms has no doors yet and the rooms are next to eachother, place a door at a random location
                     if (discovered.Contains(room) != discovered.Contains(neighbor) && !neighbor.isDoor)
                     {
@@ -363,7 +357,7 @@ public class DungeonGeneratorFast : MonoBehaviour
                         {
                             // Create door
                             int pos = random.Next(intersection.xMin + wallBuffer, intersection.xMax - wallBuffer - doorSize + 1);
-                            Room door = new Room();
+                            DungeonGenerator.Room door = new DungeonGenerator.Room();
                             door.area = new RectInt(pos, intersection.y, doorSize, intersection.height);
                             door.isDoor = true;
 
@@ -393,7 +387,7 @@ public class DungeonGeneratorFast : MonoBehaviour
                         {
                             // Create door
                             int pos = random.Next(intersection.yMin + wallBuffer, intersection.yMax - wallBuffer - doorSize + 1);
-                            Room door = new Room();
+                            DungeonGenerator.Room door = new DungeonGenerator.Room();
                             door.area = new RectInt(intersection.x, pos, intersection.width, doorSize);
                             door.isDoor = true;
 
@@ -431,7 +425,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         // Draw rooms
         if (showRooms && rooms.adjacencyList.Count > 0)
         {
-            foreach (Room room in rooms.adjacencyList.Keys)
+            foreach (DungeonGenerator.Room room in rooms.adjacencyList.Keys)
             {
                 AlgorithmsUtils.DebugRectInt(room.area, Color.green);
             }
@@ -442,9 +436,9 @@ public class DungeonGeneratorFast : MonoBehaviour
         // Create node lines:
         if (showGraph)
         {
-            foreach (Room room in rooms.KeysToList())
+            foreach (DungeonGenerator.Room room in rooms.KeysToList())
             {
-                foreach (Room neighbor in rooms.GetNeighbors(room))
+                foreach (DungeonGenerator.Room neighbor in rooms.GetNeighbors(room))
                 {
                     Vector3 roomPos;
                     roomPos.x = room.area.x + room.area.width / 2f;
@@ -464,7 +458,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         if (showDoors)
         {
             // Draw doors in blue
-            foreach (Room door in doors.adjacencyList.Keys)
+            foreach (DungeonGenerator.Room door in doors.adjacencyList.Keys)
             {
                 AlgorithmsUtils.DebugRectInt(door.area, Color.blue);
             }
@@ -473,7 +467,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         if (showRemovedRooms)
         {
             // Draw random removed rooms in red
-            foreach (Room room in removedRooms)
+            foreach (DungeonGenerator.Room room in removedRooms)
             {
                 AlgorithmsUtils.DebugRectInt(room.area, Color.red);
             }
@@ -508,12 +502,17 @@ public class DungeonGeneratorFast : MonoBehaviour
 
         // Create doors to connect rooms to eachother
         GenerateDoors();
+
+        // Create physical dungeon
+        GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().MakeDungeonPhysical(rooms, doors, 0);
     }
     private void ResetDungeon()
     {
+        GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().ClearDungeon();
+
         // Reset lists
-        rooms = new Graph<Room>();
-        doors = new Graph<Room>();
+        rooms = new Graph<DungeonGenerator.Room>();
+        doors = new Graph<DungeonGenerator.Room>();
         removedRooms.Clear();
 
         // Random seed
@@ -529,7 +528,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         dungeon = new RectInt(0, 0, dungeonWidth, dungeonHeight);
 
         // Create the first room
-        Room dungeonSizedRoom = new Room();
+        DungeonGenerator.Room dungeonSizedRoom = new DungeonGenerator.Room();
         dungeonSizedRoom.area = new RectInt(0, 0, dungeonWidth, dungeonHeight);
         rooms.AddNode(dungeonSizedRoom);
         firstRoom = dungeonSizedRoom;
