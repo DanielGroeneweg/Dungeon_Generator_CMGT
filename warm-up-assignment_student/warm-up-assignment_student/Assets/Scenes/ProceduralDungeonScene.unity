@@ -464,6 +464,8 @@ MonoBehaviour:
   wallBuffer: 1
   doorSize: 3
   percentageOfRoomsToRemove: 10
+  makeNonSquareRooms: 1
+  chanceToMakeInterestingRoom: 0.2
   roomSizeToBeRemoved: 0
   showRooms: 1
   showDoors: 1
@@ -588,6 +590,8 @@ MonoBehaviour:
   wallBuffer: 2
   doorSize: 6
   percentageOfRoomsToRemove: 0.1
+  makeNonSquareRooms: 0
+  chanceToMakeInterestingRoom: 0.2
   roomSizeToBeRemoved: 0
   showRooms: 1
   showDoors: 1

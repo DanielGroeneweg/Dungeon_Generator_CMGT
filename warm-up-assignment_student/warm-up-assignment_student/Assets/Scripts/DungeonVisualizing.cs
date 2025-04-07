@@ -4,8 +4,6 @@ using NaughtyAttributes;
 using System;
 using UnityEngine.UIElements;
 using System.Collections;
-using System.Linq;
-using RangeAttribute = UnityEngine.RangeAttribute;
 public class DungeonVisualizing : MonoBehaviour
 {
     [Header("Prefabs")]
@@ -20,7 +18,6 @@ public class DungeonVisualizing : MonoBehaviour
 
     // bools for visualization
     bool madeFloor = false;
-    bool madeWalls = false;
 
     private float TimeBetweenSteps = 0;
     public void MakeDungeonPhysical(Graph<DungeonGenerator.Room> roomGraph, Graph<DungeonGenerator.Room> doorGraph, float time)
@@ -28,7 +25,6 @@ public class DungeonVisualizing : MonoBehaviour
         TimeBetweenSteps = time;
 
         madeFloor = false;
-        madeWalls = false;
 
         rooms = roomGraph;
         doors = doorGraph;

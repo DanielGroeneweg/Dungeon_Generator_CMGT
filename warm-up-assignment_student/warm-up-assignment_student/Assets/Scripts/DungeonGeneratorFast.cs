@@ -30,6 +30,8 @@ public class DungeonGeneratorFast : MonoBehaviour
 
     [Header("Generation Stats")]
     [Range(0f, 100f)][SerializeField] private float percentageOfRoomsToRemove = 10f;
+    [SerializeField] private bool makeNonSquareRooms = false;
+    [ShowIf("makeNonSquareRooms")][RangeAttribute(0f, 1f)][SerializeField] private float chanceToMakeInterestingRoom = 0.2f;
     public enum Sizes { Smallest, Biggest }
     [SerializeField] private Sizes roomSizeToBeRemoved = Sizes.Smallest;
 
@@ -361,6 +363,14 @@ public class DungeonGeneratorFast : MonoBehaviour
                             door.area = new RectInt(pos, intersection.y, doorSize, intersection.height);
                             door.isDoor = true;
 
+                            if (makeNonSquareRooms && room.area.width != neighbor.area.width)
+                            {
+                                if (random.Next(0, 101) <= chanceToMakeInterestingRoom * 100)
+                                {
+                                    door.area = new RectInt(intersection.x + wallBuffer, intersection.y, intersection.width - wallBuffer * 2, intersection.height);
+                                }
+                            }
+
                             // Add door to list and as neighbors from rooms
                             doors.AddNode(door);
 
@@ -390,6 +400,14 @@ public class DungeonGeneratorFast : MonoBehaviour
                             DungeonGenerator.Room door = new DungeonGenerator.Room();
                             door.area = new RectInt(intersection.x, pos, intersection.width, doorSize);
                             door.isDoor = true;
+
+                            if (makeNonSquareRooms && room.area.height != neighbor.area.height)
+                            {
+                                if (random.Next(0, 101) <= chanceToMakeInterestingRoom * 100)
+                                {
+                                    door.area = new RectInt(intersection.x, intersection.y + wallBuffer, intersection.width, intersection.height - wallBuffer * 2);
+                                }
+                            }
 
                             // Add door to list and as neighbors from rooms
                             doors.AddNode(door);
