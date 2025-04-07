@@ -22,10 +22,10 @@ public class DungeonVisualizing : MonoBehaviour
     bool madeFloor = false;
     bool madeWalls = false;
 
-    float waitTime = 0;
+    private float TimeBetweenSteps = 0;
     public void MakeDungeonPhysical(Graph<DungeonGenerator.Room> roomGraph, Graph<DungeonGenerator.Room> doorGraph, float time)
     {
-        waitTime = time;
+        TimeBetweenSteps = time;
 
         madeFloor = false;
         madeWalls = false;
@@ -64,9 +64,7 @@ public class DungeonVisualizing : MonoBehaviour
         StartCoroutine(GenerateFloor());
         yield return new WaitUntil(() => madeFloor);
 
-        StartCoroutine(GenerateWalls());
-        yield return new WaitUntil(() => madeWalls);
-
+        GenerateWalls();
     }
     private IEnumerator GenerateFloor()
     {
@@ -80,38 +78,43 @@ public class DungeonVisualizing : MonoBehaviour
 
             obj.localScale = new Vector3(room.area.width, 0.1f, room.area.height);
 
-            yield return new WaitForSeconds(waitTime);
+            yield return new WaitForSeconds(TimeBetweenSteps);
         }
         madeFloor = true;
     }
-    private IEnumerator GenerateWalls()
+    private void GenerateWalls()
     {
         foreach(DungeonGenerator.Room room in rooms.KeysToList())
         {
-            foreach(Vector2 position in room.area.allPositionsWithin)
+            StartCoroutine(MakeWalls(room));
+        }
+    }
+    private IEnumerator MakeWalls(DungeonGenerator.Room room)
+    {
+        foreach (Vector2 position in room.area.allPositionsWithin)
+        {
+            if (position.x == room.area.xMin || position.x == room.area.xMax - 1 || position.y == room.area.yMin || position.y == room.area.yMax - 1)
             {
-                if (position.x == room.area.xMin || position.x == room.area.xMax - 1 || position.y == room.area.yMin || position.y == room.area.yMax - 1)
+                bool pointIsIndoor = false;
+
+                foreach (DungeonGenerator.Room neighbor in rooms.GetNeighbors(room))
                 {
-                    bool pointIsIndoor = false;
-
-                    foreach(DungeonGenerator.Room neighbor in rooms.GetNeighbors(room))
-                    {
-                        if (pointIsInRectInt(position, neighbor.area)) pointIsIndoor = true;
-                    }
-
-                    if (!pointIsIndoor)
-                    {
-                        Transform obj = GameObject.Instantiate(
-                                wallPrefab,
-                                new Vector3(position.x + 0.5f, wallHeight / 2f, position.y + 0.5f),
-                                Quaternion.identity,
-                                transform
-                            );
-
-                        obj.localScale = new Vector3(1, wallHeight, 1);
-                        yield return new WaitForSeconds(waitTime);
-                    }
+                    if (pointIsInRectInt(position, neighbor.area)) pointIsIndoor = true;
                 }
+
+                if (!pointIsIndoor)
+                {
+                    Transform obj = GameObject.Instantiate(
+                            wallPrefab,
+                            new Vector3(position.x + 0.5f, wallHeight / 2f, position.y + 0.5f),
+                            Quaternion.identity,
+                            transform
+                        );
+
+                    obj.localScale = new Vector3(1, wallHeight, 1);
+                }
+
+                yield return new WaitForSeconds(TimeBetweenSteps);
             }
         }
     }

@@ -25,13 +25,13 @@ public class DungeonGenerator : MonoBehaviour
     [Header("Room Stats")]
     [SerializeField] private int roomMinWidth = 100;
     [SerializeField] private int roomMinHeight = 100;
-    [SerializeField] private int wallBuffer = 2;
+    [MinValue(1)][SerializeField] private int wallBuffer = 1;
 
     [Header("Door Stats")]
     [SerializeField] private int doorSize = 6;
 
     [Header("Generation Stats")]
-    [Range(0f, 1f)][SerializeField] private float percentageOfRoomsToRemove = 0.1f;
+    [Range(0f, 100f)][SerializeField] private float percentageOfRoomsToRemove = 10;
     public enum Sizes { Smallest, Biggest }
     [SerializeField] private Sizes roomSizeToBeRemoved = Sizes.Smallest;
 
@@ -236,7 +236,7 @@ public class DungeonGenerator : MonoBehaviour
     private IEnumerator RemoveSmallestRooms()
     {
         float roomCountAtStart = rooms.adjacencyList.Count;
-        float percentageRemoved = 1f - rooms.adjacencyList.Count / roomCountAtStart;
+        float percentageRemoved = (1f - rooms.adjacencyList.Count / roomCountAtStart) * 100f;
 
         List<Room> roomList = rooms.KeysToList();
 
@@ -264,7 +264,7 @@ public class DungeonGenerator : MonoBehaviour
                 removedRooms.Add(roomToBeDestroyed);
 
                 // Handle the percentage
-                percentageRemoved = 1f - rooms.adjacencyList.Count / roomCountAtStart;
+                percentageRemoved = (1f - rooms.adjacencyList.Count / roomCountAtStart) * 100f;
             }
 
             else
