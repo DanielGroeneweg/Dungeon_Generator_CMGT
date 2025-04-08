@@ -1,8 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using Unity.AI.Navigation;
 public class DungeonVisualizing : MonoBehaviour
 {
+    [Header("References")]
+    [SerializeField] private NavMeshSurface surface;
+
     [Header("Prefabs")]
     [SerializeField] private Transform floorPrefab;
     [SerializeField] private Transform wallPrefab;
@@ -22,6 +26,9 @@ public class DungeonVisualizing : MonoBehaviour
     private HashSet<Vector2> discoveredPositions;
 
     private PlayerController player;
+
+    private int finishedWallsCount = 0;
+    private int finishedFloorsCount = 0;
     private void Start()
     {
         discoveredPositions= new HashSet<Vector2>();
@@ -38,7 +45,11 @@ public class DungeonVisualizing : MonoBehaviour
     public void ClearDungeon()
     {
         StopAllCoroutines();
+        surface.RemoveData();
         discoveredPositions.Clear();
+
+        finishedWallsCount = 0;
+        finishedFloorsCount = 0;
 
         // Remove all assets
         foreach (Transform child in roomsParentObject)
@@ -74,6 +85,11 @@ public class DungeonVisualizing : MonoBehaviour
             yield return new WaitForSeconds(TimeBetweenSteps);
         }
 
+        yield return new WaitUntil(() => (finishedWallsCount == rooms.KeysToList().Count && finishedFloorsCount == rooms.KeysToList().Count));
+
+        // Bake NavMesh
+        surface.BuildNavMesh();
+
         // Spawn player in the first room of the list
         DungeonGenerator.Room firstRoom = rooms.KeysToList()[0];
         Vector2 pos = firstRoom.area.center;
@@ -83,7 +99,7 @@ public class DungeonVisualizing : MonoBehaviour
             Quaternion.identity,
             roomsParentObject.transform
         );
-        player.name = "Player";
+        player.gameObject.name = "Player";
     }
     private void GenerateFloor(DungeonGenerator.Room room, GameObject parentObject)
     {
@@ -95,7 +111,9 @@ public class DungeonVisualizing : MonoBehaviour
             );
 
         obj.name = "Floor";
-        obj.localScale = new Vector3(room.area.width, 0.1f, room.area.height);
+        obj.localScale = new Vector3(room.area.width, room.area.height, 1);
+        obj.localEulerAngles = new Vector3(90, 0, 0);
+        finishedFloorsCount++;
     }
     private IEnumerator MakeWalls(DungeonGenerator.Room room, GameObject parentObject)
     {
@@ -120,5 +138,6 @@ public class DungeonVisualizing : MonoBehaviour
                 yield return new WaitForSeconds(TimeBetweenSteps);
             }
         }
+        finishedWallsCount++;
     }
 }
