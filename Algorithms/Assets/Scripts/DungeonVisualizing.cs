@@ -76,8 +76,8 @@ public class DungeonVisualizing : MonoBehaviour
         }
 
         // Spawn player in the first room of the list
-        DungeonGenerator.Room room = rooms.KeysToList()[0];
-        Vector2 pos = room.area.center;
+        DungeonGenerator.Room firstRoom = rooms.KeysToList()[0];
+        Vector2 pos = firstRoom.area.center;
         playerPrefab = GameObject.Instantiate(playerPrefab, new Vector3(pos.x, 0.1f, pos.y), Quaternion.identity);
     }
     private void GenerateFloor(DungeonGenerator.Room room, GameObject parentObject)
