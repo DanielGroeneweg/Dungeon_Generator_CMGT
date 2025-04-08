@@ -9,6 +9,7 @@ public class DungeonVisualizing : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField] private Transform floorPrefab;
     [SerializeField] private Transform wallPrefab;
+    [SerializeField] private PlayerController playerPrefab;
 
     [Header("Stats")]
     [SerializeField] private float wallHeight = 4;
@@ -75,7 +76,9 @@ public class DungeonVisualizing : MonoBehaviour
         }
 
         // Spawn player in the first room of the list
-
+        DungeonGenerator.Room room = rooms.KeysToList()[0];
+        Vector2 pos = room.area.center;
+        playerPrefab = GameObject.Instantiate(playerPrefab, new Vector3(pos.x, 0.1f, pos.y), Quaternion.identity);
     }
     private void GenerateFloor(DungeonGenerator.Room room, GameObject parentObject)
     {
