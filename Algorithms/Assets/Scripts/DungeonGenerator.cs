@@ -490,15 +490,17 @@ public class DungeonGenerator : MonoBehaviour
             {
                 foreach (Room neighbor in rooms.GetNeighbors(room))
                 {
-                    Vector3 roomPos;
-                    roomPos.x = room.area.x + room.area.width / 2f;
-                    roomPos.y = 0.1f;
-                    roomPos.z = room.area.y + room.area.height / 2f;
+                    Vector3 roomPos = new Vector3(
+                        room.area.center.x,
+                        0,
+                        room.area.center.y
+                    );
 
-                    Vector3 neighborPos;
-                    neighborPos.x = neighbor.area.x + neighbor.area.width / 2f;
-                    neighborPos.y = 0.1f;
-                    neighborPos.z = neighbor.area.y + neighbor.area.height / 2f;
+                    Vector3 neighborPos = new Vector3(
+                        neighbor.area.center.x,
+                        0,
+                        neighbor.area.center.y
+                    );
 
                     Debug.DrawLine(roomPos, neighborPos, Color.red);
                 }

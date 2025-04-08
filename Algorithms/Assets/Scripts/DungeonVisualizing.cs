@@ -1,8 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using NaughtyAttributes;
-using System;
-using UnityEngine.UIElements;
 using System.Collections;
 public class DungeonVisualizing : MonoBehaviour
 {
@@ -23,6 +20,8 @@ public class DungeonVisualizing : MonoBehaviour
     private float TimeBetweenSteps = 0;
 
     private HashSet<Vector2> discoveredPositions;
+
+    private PlayerController player;
     private void Start()
     {
         discoveredPositions= new HashSet<Vector2>();
@@ -78,13 +77,19 @@ public class DungeonVisualizing : MonoBehaviour
         // Spawn player in the first room of the list
         DungeonGenerator.Room firstRoom = rooms.KeysToList()[0];
         Vector2 pos = firstRoom.area.center;
-        playerPrefab = GameObject.Instantiate(playerPrefab, new Vector3(pos.x, 0.1f, pos.y), Quaternion.identity);
+        player = GameObject.Instantiate(
+            playerPrefab,
+            new Vector3(pos.x, 0.1f, pos.y),
+            Quaternion.identity,
+            roomsParentObject.transform
+        );
+        player.name = "Player";
     }
     private void GenerateFloor(DungeonGenerator.Room room, GameObject parentObject)
     {
         Transform obj = GameObject.Instantiate(
             floorPrefab,
-            new Vector3(room.area.x + room.area.width / 2f, 0, room.area.y + room.area.height / 2f),
+            new Vector3(room.area.center.x, 0, room.area.center.y),
             Quaternion.identity,
             parentObject.transform
             );
