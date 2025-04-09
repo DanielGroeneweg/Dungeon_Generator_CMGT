@@ -363,109 +363,84 @@ public class DungeonGenerator : MonoBehaviour
     #region DoorGenerating
     private IEnumerator GenerateDoors()
     {
-        HashSet<Room> discovered = new HashSet<Room>();
-        discovered.Add(rooms.adjacencyList.Keys.First());
-        bool placedDoors = true;
-
-        // Go through the list of rooms until all rooms have a door
-        while (placedDoors)
+        // For each room, check each neighboring room
+        // Complexity: (O(n^2))
+        foreach (Room room in rooms.adjacencyList.Keys)
         {
-            placedDoors = false;
-
-            // For each room, check each neighboring room
-            // Complexity: (O(n^2))
-            foreach (Room room in rooms.adjacencyList.Keys)
+            for (int i = rooms.adjacencyList[room].Count - 1; i >= 0; i--)
             {
-                for (int i = rooms.adjacencyList[room].Count - 1; i >= 0; i--)
+                List<Room> neighbors = rooms.adjacencyList[room];
+                Room neighbor = neighbors[i];
+                // if ONE of the rooms has no doors yet and the rooms are next to eachother, place a door at a random location
+                if (!neighbor.isDoor)
                 {
-                    List<Room> neighbors = rooms.adjacencyList[room];
-                    Room neighbor = neighbors[i];
-                    // if ONE of the rooms has no doors yet and the rooms are next to eachother, place a door at a random location
-                    if (discovered.Contains(room) != discovered.Contains(neighbor) && !neighbor.isDoor)
+                    RectInt intersection = AlgorithmsUtils.Intersect(room.area, neighbor.area);
+                    if (intersection.width > intersection.height)
                     {
-                        RectInt intersection = AlgorithmsUtils.Intersect(room.area, neighbor.area);
-                        if (intersection.width > intersection.height)
+                        // Create door
+                        int pos = random.Next(intersection.xMin + wallBuffer, intersection.xMax - wallBuffer - doorSize + 1);
+                        Room door = new Room();
+                        door.area = new RectInt(pos, intersection.y, doorSize, intersection.height);
+                        door.isDoor = true;
+
+                        if (makeNonSquareRooms && room.area.width != neighbor.area.width)
                         {
-                            // Create door
-                            int pos = random.Next(intersection.xMin + wallBuffer, intersection.xMax - wallBuffer - doorSize + 1);
-                            Room door = new Room();
-                            door.area = new RectInt(pos, intersection.y, doorSize, intersection.height);
-                            door.isDoor = true;
-
-                            if (makeNonSquareRooms && room.area.width != neighbor.area.width)
+                            if (random.Next(0, 101) <= chanceToMakeInterestingRoom * 100)
                             {
-                                if (random.Next(0, 101) <= chanceToMakeInterestingRoom * 100)
-                                {
-                                    door.area = new RectInt(intersection.x + wallBuffer, intersection.y, intersection.width - wallBuffer * 2, intersection.height);
-                                }
+                                door.area = new RectInt(intersection.x + wallBuffer, intersection.y, intersection.width - wallBuffer * 2, intersection.height);
                             }
-
-                            // Add door to list and as neighbors from rooms
-                            doors.AddNode(door);
-
-                            doors.AddNeighbor(door, room);
-                            doors.AddNeighbor(door, neighbor);
-
-                            rooms.AddNeighbor(room, door);
-                            rooms.AddNeighbor(neighbor, door);
-
-                            // Remove the connection from room to room
-                            rooms.RemoveNeighbor(room, neighbor);
-                            rooms.RemoveNeighbor(neighbor, room);
-
-                            // Add to discovered
-                            if (!discovered.Contains(room)) discovered.Add(room);
-                            if (!discovered.Contains(neighbor)) discovered.Add(neighbor);
-                            
-                            discovered.Add(door);
-
-                            placedDoors = true;
-                            yield return new WaitForSeconds(timeBetweenSteps);
                         }
 
-                        else
+                        // Add door to list and as neighbors from rooms
+                        doors.AddNode(door);
+
+                        doors.AddNeighbor(door, room);
+                        doors.AddNeighbor(door, neighbor);
+
+                        rooms.AddNeighbor(room, door);
+                        rooms.AddNeighbor(neighbor, door);
+
+                        // Remove the connection from room to room
+                        rooms.RemoveNeighbor(room, neighbor);
+                        rooms.RemoveNeighbor(neighbor, room);
+
+                        yield return new WaitForSeconds(timeBetweenSteps);
+                    }
+
+                    else
+                    {
+                        // Create door
+                        int pos = random.Next(intersection.yMin + wallBuffer, intersection.yMax - wallBuffer - doorSize + 1);
+                        Room door = new Room();
+                        door.area = new RectInt(intersection.x, pos, intersection.width, doorSize);
+                        door.isDoor = true;
+
+                        if (makeNonSquareRooms && room.area.height != neighbor.area.height)
                         {
-                            // Create door
-                            int pos = random.Next(intersection.yMin + wallBuffer, intersection.yMax - wallBuffer - doorSize + 1);
-                            Room door = new Room();
-                            door.area = new RectInt(intersection.x, pos, intersection.width, doorSize);
-                            door.isDoor = true;
-
-                            if (makeNonSquareRooms && room.area.height != neighbor.area.height)
+                            if (random.Next(0, 101) <= chanceToMakeInterestingRoom * 100)
                             {
-                                if (random.Next(0, 101) <= chanceToMakeInterestingRoom * 100)
-                                {
-                                    door.area = new RectInt(intersection.x, intersection.y + wallBuffer, intersection.width, intersection.height - wallBuffer * 2);
-                                }
+                                door.area = new RectInt(intersection.x, intersection.y + wallBuffer, intersection.width, intersection.height - wallBuffer * 2);
                             }
-
-                            // Add door to list and as neighbors from rooms
-                            doors.AddNode(door);
-                            doors.AddNeighbor(door, room);
-                            doors.AddNeighbor(door, neighbor);
-
-                            // Remove the connection from room to room
-                            rooms.AddNeighbor(room, door);
-                            rooms.AddNeighbor(neighbor, door);
-
-                            // Remove the connection from room to room
-                            rooms.RemoveNeighbor(room, neighbor);
-                            rooms.RemoveNeighbor(neighbor, room);
-
-                            // Add to discovered
-                            if (!discovered.Contains(room)) discovered.Add(room);
-                            if (!discovered.Contains(neighbor)) discovered.Add(neighbor);
-
-                            discovered.Add(door);
-
-                            placedDoors = true;
-                            yield return new WaitForSeconds(timeBetweenSteps);
                         }
+
+                        // Add door to list and as neighbors from rooms
+                        doors.AddNode(door);
+                        doors.AddNeighbor(door, room);
+                        doors.AddNeighbor(door, neighbor);
+
+                        // Remove the connection from room to room
+                        rooms.AddNeighbor(room, door);
+                        rooms.AddNeighbor(neighbor, door);
+
+                        // Remove the connection from room to room
+                        rooms.RemoveNeighbor(room, neighbor);
+                        rooms.RemoveNeighbor(neighbor, room);
+
+                        yield return new WaitForSeconds(timeBetweenSteps);
                     }
                 }
             }
         }
-        finishedDoors = true;
     }
     #endregion
 

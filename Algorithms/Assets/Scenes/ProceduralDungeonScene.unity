@@ -7458,7 +7458,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1796602037
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8206,10 +8206,11 @@ MonoBehaviour:
   roomMinHeight: 10
   wallBuffer: 1
   doorSize: 3
+  removeRooms: 1
   percentageOfRoomsToRemove: 10
+  roomSizeToBeRemoved: 0
   makeNonSquareRooms: 1
   chanceToMakeInterestingRoom: 0.2
-  roomSizeToBeRemoved: 0
   showRooms: 1
   showDoors: 1
   showDungeonOutLine: 1
