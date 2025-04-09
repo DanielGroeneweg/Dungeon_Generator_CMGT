@@ -37,7 +37,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     public enum Sizes { Smallest, Biggest, Random }
     [ShowIf("removeRooms")][SerializeField] private Sizes roomSizeToBeRemoved = Sizes.Smallest;
     [SerializeField] private bool makeNonSquareRooms = false;
-    [ShowIf("makeNonSquareRooms")][RangeAttribute(0f, 1f)][SerializeField] private float chanceToMakeInterestingRoom = 0.2f;
+    [ShowIf("makeNonSquareRooms")][RangeAttribute(0f, 100f)][SerializeField] private float chanceToMakeInterestingRoom = 20f;
 
     // Not in inspector
     public Graph<DungeonGenerator.Room> rooms;
