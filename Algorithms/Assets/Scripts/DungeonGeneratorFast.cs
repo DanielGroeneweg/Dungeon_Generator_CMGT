@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using System.Collections;
 using System.Linq;
 using RangeAttribute = UnityEngine.RangeAttribute;
+using System.Reflection;
 public class DungeonGeneratorFast : MonoBehaviour
 {
     #region variables
@@ -552,6 +553,25 @@ public class DungeonGeneratorFast : MonoBehaviour
         dungeonSizedRoom.area = new RectInt(0, 0, dungeonWidth, dungeonHeight);
         rooms.AddNode(dungeonSizedRoom);
         firstRoom = dungeonSizedRoom;
+    }
+    #endregion
+
+    #region SetInspectorValues
+    public void ChangeBool(string boolName)
+    {
+        Type scriptType = this.GetType();
+        FieldInfo field = scriptType.GetField(boolName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+        if (field != null && field.FieldType == typeof(bool))
+        {
+            bool currentValue = (bool)field.GetValue(this);
+            Debug.Log($"Changing '{boolName}' from {currentValue} to {!currentValue}");
+            field.SetValue(this, !currentValue);
+        }
+        else
+        {
+            Debug.LogWarning($"Bool field '{boolName}' not found or not a bool.");
+        }
     }
     #endregion
 }
