@@ -3,15 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static UnityEngine.Rendering.DebugUI;
 using RangeAttribute = UnityEngine.RangeAttribute;
 public class DungeonGeneratorFast : MonoBehaviour
 {
     #region variables
     public enum PathSearchingMethods { DepthFirst, BreadthFirst }
     [SerializeField] private bool removeCyclingPaths = true;
-    [SerializeField] private PathSearchingMethods pathSearchingMethod = PathSearchingMethods.DepthFirst;
+    [ShowIf("removeCyclingPaths")][SerializeField] private PathSearchingMethods pathSearchingMethod = PathSearchingMethods.DepthFirst;
 
     [Header("Seed")]
     [SerializeField] private bool useSeed = false;
@@ -56,6 +59,15 @@ public class DungeonGeneratorFast : MonoBehaviour
 
     // Sorting
     public enum SortingOrders { SmallestToBiggest, BiggestToSmallest }
+
+    [Header("Required Components")]
+    [SerializeField] private TMP_InputField seedInput;
+    [SerializeField] private TMP_InputField dungeonWidthInput;
+    [SerializeField] private TMP_InputField dungeonHeightInput;
+    [SerializeField] private TMP_InputField roomWidthInput;
+    [SerializeField] private TMP_InputField roomHeightInput;
+    [SerializeField] private TMP_InputField wallInput;
+    [SerializeField] private TMP_InputField doorInput;
     #endregion
     private void Start()
     {
@@ -276,6 +288,12 @@ public class DungeonGeneratorFast : MonoBehaviour
     }
     private bool AllRoomsAreConnected(List<DungeonGenerator.Room> list)
     {
+        if (list == null || list.Count == 0)
+        {
+            Debug.Log("List is empty or null");
+            return false;
+        }
+
         HashSet<DungeonGenerator.Room> discovered = new HashSet<DungeonGenerator.Room>();
 
         bool foundConnectedRooms = true;
@@ -439,7 +457,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     #endregion
 
     #region DungeonDrawing
-    void Update()
+    void DrawRooms()
     {
         // Draw rooms
         if (showRooms && rooms.adjacencyList.Count > 0)
@@ -591,8 +609,6 @@ public class DungeonGeneratorFast : MonoBehaviour
     #endregion
 
     #region ints
-
-    #region Seed
     public void ChangeSeed(string input)
     {
         if (int.TryParse(input, out int result))
@@ -605,9 +621,174 @@ public class DungeonGeneratorFast : MonoBehaviour
             Debug.LogWarning("Invalid input: Not an integer");
         }
     }
+    public void ChangeDungeonWidth(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            // Clamp to min/max
+            if (result < 3) result = 3;
+
+            // Update the value and UI
+            dungeonWidth = result;
+            dungeonWidthInput.text = dungeonWidth.ToString(); // reset UI in case we clamped it
+
+            Debug.Log($"Updated dungeonWidth: {dungeonWidth}");
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+            dungeonWidthInput.text = dungeonWidth.ToString();
+        }
+    }
+    public void ChangeDungeonHeight(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            // Clamp to min/max
+            if (result < 3) result = 3;
+
+            // Update the value and UI
+            dungeonHeight = result;
+            dungeonHeightInput.text = dungeonHeight.ToString(); // reset UI in case we clamped it
+
+            Debug.Log($"Updated dungeonHeight: {dungeonHeight}");
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+            dungeonHeightInput.text = dungeonHeight.ToString();
+        }
+    }
+    public void ChangeRoomWidth(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            // Clamp to min/max
+            if (result < dungeonWidth) result = dungeonWidth;
+
+            // Update the value and UI
+            roomMinWidth = result;
+            roomWidthInput.text = roomMinWidth.ToString(); // reset UI in case we clamped it
+
+            Debug.Log($"Updated roomMinWidth: {roomMinWidth}");
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+            roomWidthInput.text = roomMinWidth.ToString();
+        }
+    }
+    public void ChangeRoomHeight(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            // Clamp to min/max
+            if (result < dungeonHeight) result = dungeonHeight;
+
+            // Update the value and UI
+            roomMinHeight = result;
+            roomHeightInput.text = roomMinHeight.ToString(); // reset UI in case we clamped it
+
+            Debug.Log($"Updated roomMinHeight: {roomMinHeight}");
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+            roomHeightInput.text = roomMinHeight.ToString();
+        }
+    }
+    public void ChangeWallSize(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            // Clamp to min/max
+            int min = 1;
+            int max = Mathf.Min(roomMinWidth, roomMinHeight) - 2;
+            result = Mathf.Clamp(result, min, max);
+
+            // Update the value and UI
+            wallBuffer = result;
+            wallInput.text = wallBuffer.ToString(); // reset UI in case we clamped it
+
+            Debug.Log($"Updated wallBuffer: {wallBuffer}");
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+            wallInput.text = wallBuffer.ToString();
+        }
+    }
+    public void ChangeDoorSize(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            // Clamp to min/max
+            int min = 1;
+            int max = Mathf.Min(roomMinWidth, roomMinHeight) - wallBuffer * 2;
+            result = Mathf.Clamp(result, min, max);
+
+            // Update the value and UI
+            doorSize = result;
+            doorInput.text = doorSize.ToString(); // reset UI in case we clamped it
+
+            Debug.Log($"Updated doorSize: {doorSize}");
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+            doorInput.text = doorSize.ToString();
+        }
+    }
+    #endregion
+
+    #region GetValue
+    public void SetSeedText()
+    {
+        TMP_InputField field = GameObject.Find("SeedInput").GetComponent<TMP_InputField>();
+        field.text = seed.ToString();
+    }
     #endregion
 
     #endregion
+    private void Update()
+    {
+        DrawRooms();
 
-    #endregion
+        // Room Min Width
+        if (roomMinWidth < 3)
+        {
+            roomMinWidth = 3;
+            roomWidthInput.text = roomMinWidth.ToString();
+        }
+
+        // Room Min Height
+        if (roomMinHeight < 3)
+        {
+            roomMinHeight = 3;
+            roomHeightInput.text = roomMinHeight.ToString();
+        }
+
+        // Wall Buffer
+        if (roomMinWidth - wallBuffer * 2 < 1 || roomMinHeight - wallBuffer * 2 < 1)
+        {
+            int min = 1;
+            int max = Mathf.Min(roomMinWidth, roomMinHeight) - 2;
+            wallBuffer = Mathf.Clamp(wallBuffer, min, max);
+            wallInput.text = wallBuffer.ToString();
+        }
+
+        // Door Size
+        if (doorSize > roomMinWidth - wallBuffer * 2 || doorSize > roomMinHeight - wallBuffer * 2)
+        {
+            int min = 1;
+            int max = Mathf.Min(roomMinWidth, roomMinHeight) - wallBuffer * 2;
+            doorSize = Mathf.Clamp(doorSize, min, max);
+            doorInput.text = doorSize.ToString();
+        }
+
+        if (seedInput.gameObject.activeSelf)
+        {
+            seedInput.text = seed.ToString();
+        }
+    }
 }
