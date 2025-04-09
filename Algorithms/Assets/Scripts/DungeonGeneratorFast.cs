@@ -1,16 +1,16 @@
-using UnityEngine;
-using System.Collections.Generic;
 using NaughtyAttributes;
 using System;
-using UnityEngine.UIElements;
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-using RangeAttribute = UnityEngine.RangeAttribute;
 using System.Reflection;
+using UnityEngine;
+using UnityEngine.UIElements;
+using RangeAttribute = UnityEngine.RangeAttribute;
 public class DungeonGeneratorFast : MonoBehaviour
 {
     #region variables
     public enum PathSearchingMethods { DepthFirst, BreadthFirst }
+    [SerializeField] private bool removeCyclingPaths = true;
     [SerializeField] private PathSearchingMethods pathSearchingMethod = PathSearchingMethods.DepthFirst;
 
     [Header("Seed")]
@@ -223,10 +223,10 @@ public class DungeonGeneratorFast : MonoBehaviour
         // Sort the list
         if (roomSizeToBeRemoved == Sizes.Smallest)
             roomList = SortRoomsBySize(roomList, SortingOrders.SmallestToBiggest);
-            
+
         else if (roomSizeToBeRemoved == Sizes.Biggest)
             roomList = SortRoomsBySize(roomList, SortingOrders.BiggestToSmallest);
-            
+
 
         while (percentageRemoved < percentageOfRoomsToRemove)
         {
@@ -261,7 +261,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     private List<DungeonGenerator.Room> SortRoomsBySize(List<DungeonGenerator.Room> list, SortingOrders sortingOrder)
     {
         List<DungeonGenerator.Room> sortedList = list;
-        switch(sortingOrder)
+        switch (sortingOrder)
         {
             case SortingOrders.SmallestToBiggest:
                 // Complexity: O(n log n)
@@ -504,7 +504,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     public void GenerateDungeon()
     {
         ResetDungeon();
-        
+
         DungeonGeneration();
     }
     private void DungeonGeneration()
@@ -519,7 +519,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         RemoveSmallestRooms();
 
         // Generate a path through the dungeon
-        GeneratePath();
+        if (removeCyclingPaths) GeneratePath();
 
         // Create doors to connect rooms to eachother
         GenerateDoors();
@@ -557,6 +557,8 @@ public class DungeonGeneratorFast : MonoBehaviour
     #endregion
 
     #region SetInspectorValues
+
+    #region bools
     public void ChangeBool(string boolName)
     {
         Type scriptType = this.GetType();
@@ -573,5 +575,39 @@ public class DungeonGeneratorFast : MonoBehaviour
             Debug.LogWarning($"Bool field '{boolName}' not found or not a bool.");
         }
     }
+    #endregion
+
+    #region enums
+    public void ChangePathingMethod(Int32 selectedIndex)
+    {
+        pathSearchingMethod = (PathSearchingMethods)selectedIndex;
+        Debug.Log($"Enum changed to: {pathSearchingMethod}");
+    }
+    public void ChangeRoomRemovalSize(Int32 selectedIndex)
+    {
+        roomSizeToBeRemoved = (Sizes)selectedIndex;
+        Debug.Log($"Enum changed to: {pathSearchingMethod}");
+    }
+    #endregion
+
+    #region ints
+
+    #region Seed
+    public void ChangeSeed(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            seed = result;
+            Debug.Log("Updated seed: " + seed);
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+        }
+    }
+    #endregion
+
+    #endregion
+
     #endregion
 }
