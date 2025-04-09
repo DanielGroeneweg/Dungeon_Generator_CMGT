@@ -59,7 +59,6 @@ public class DungeonGeneratorFast : MonoBehaviour
     [SerializeField] private TMP_InputField dungeonHeightInput;
     [SerializeField] private TMP_InputField roomWidthInput;
     [SerializeField] private TMP_InputField roomHeightInput;
-    [SerializeField] private TMP_InputField wallInput;
     [SerializeField] private TMP_InputField doorInput;
     [SerializeField] private Slider percentageSlider;
     [SerializeField] private TMP_InputField percentageInput;
@@ -241,6 +240,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         {
             // Remove first room in the sorted list
             DungeonGenerator.Room roomToBeDestroyed = roomList[0];
+            if (roomSizeToBeRemoved == Sizes.Random) roomToBeDestroyed = roomList[random.Next(0, roomList.Count)];
 
             List<DungeonGenerator.Room> neighbors = rooms.GetNeighbors(roomToBeDestroyed);
 
@@ -607,27 +607,6 @@ public class DungeonGeneratorFast : MonoBehaviour
             roomHeightInput.text = roomMinHeight.ToString();
         }
     }
-    public void ChangeWallSize(string input)
-    {
-        if (int.TryParse(input, out int result))
-        {
-            // Clamp to min/max
-            int min = 1;
-            int max = Mathf.Min(roomMinWidth, roomMinHeight) - 2;
-            result = Mathf.Clamp(result, min, max);
-
-            // Update the value and UI
-            wallBuffer = result;
-            wallInput.text = wallBuffer.ToString(); // reset UI in case we clamped it
-
-            Debug.Log($"Updated wallBuffer: {wallBuffer}");
-        }
-        else
-        {
-            Debug.LogWarning("Invalid input: Not an integer");
-            wallInput.text = wallBuffer.ToString();
-        }
-    }
     public void ChangeDoorSize(string input)
     {
         if (int.TryParse(input, out int result))
@@ -732,15 +711,6 @@ public class DungeonGeneratorFast : MonoBehaviour
         {
             roomMinHeight = 3;
             roomHeightInput.text = roomMinHeight.ToString();
-        }
-
-        // Wall Buffer
-        if (roomMinWidth - wallBuffer * 2 < 1 || roomMinHeight - wallBuffer * 2 < 1)
-        {
-            int min = 1;
-            int max = Mathf.Min(roomMinWidth, roomMinHeight) - 2;
-            wallBuffer = Mathf.Clamp(wallBuffer, min, max);
-            wallInput.text = wallBuffer.ToString();
         }
 
         // Door Size
