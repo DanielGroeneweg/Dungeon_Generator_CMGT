@@ -6,7 +6,6 @@ using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using static UnityEngine.Rendering.DebugUI;
 using RangeAttribute = UnityEngine.RangeAttribute;
 public class DungeonGeneratorFast : MonoBehaviour
@@ -40,13 +39,6 @@ public class DungeonGeneratorFast : MonoBehaviour
     [SerializeField] private bool makeNonSquareRooms = false;
     [ShowIf("makeNonSquareRooms")][RangeAttribute(0f, 1f)][SerializeField] private float chanceToMakeInterestingRoom = 0.2f;
 
-    [Header("Visualization")]
-    [SerializeField] private bool showRooms = true;
-    [SerializeField] private bool showDoors = true;
-    [SerializeField] private bool showDungeonOutLine = true;
-    [SerializeField] private bool showRemovedRooms = true;
-    [SerializeField] private bool showGraph = true;
-
     // Not in inspector
     public Graph<DungeonGenerator.Room> rooms;
     public Graph<DungeonGenerator.Room> doors;
@@ -69,6 +61,10 @@ public class DungeonGeneratorFast : MonoBehaviour
     [SerializeField] private TMP_InputField roomHeightInput;
     [SerializeField] private TMP_InputField wallInput;
     [SerializeField] private TMP_InputField doorInput;
+    [SerializeField] private Slider percentageSlider;
+    [SerializeField] private TMP_InputField percentageInput;
+    [SerializeField] private Slider chanceSlider;
+    [SerializeField] private TMP_InputField chanceInput;
     #endregion
     private void Start()
     {
@@ -376,7 +372,7 @@ public class DungeonGeneratorFast : MonoBehaviour
 
                         if (makeNonSquareRooms && room.area.width != neighbor.area.width)
                         {
-                            if (random.Next(0, 101) <= chanceToMakeInterestingRoom * 100)
+                            if (random.Next(0, 101) <= chanceToMakeInterestingRoom)
                             {
                                 door.area = new RectInt(intersection.x + wallBuffer, intersection.y, intersection.width - wallBuffer * 2, intersection.height);
                             }
@@ -406,7 +402,7 @@ public class DungeonGeneratorFast : MonoBehaviour
 
                         if (makeNonSquareRooms && room.area.height != neighbor.area.height)
                         {
-                            if (random.Next(0, 101) <= chanceToMakeInterestingRoom * 100)
+                            if (random.Next(0, 101) <= chanceToMakeInterestingRoom)
                             {
                                 door.area = new RectInt(intersection.x, intersection.y + wallBuffer, intersection.width, intersection.height - wallBuffer * 2);
                             }
@@ -428,67 +424,6 @@ public class DungeonGeneratorFast : MonoBehaviour
                 }
             }
         }
-    }
-    #endregion
-
-    #region DungeonDrawing
-    void DrawRooms()
-    {
-        // Draw rooms
-        if (showRooms && rooms.adjacencyList.Count > 0)
-        {
-            foreach (DungeonGenerator.Room room in rooms.adjacencyList.Keys)
-            {
-                AlgorithmsUtils.DebugRectInt(room.area, Color.green);
-            }
-
-            AlgorithmsUtils.DebugRectInt(rooms.adjacencyList.Keys.First().area, Color.cyan);
-        }
-
-        // Create node lines:
-        if (showGraph)
-        {
-            foreach (DungeonGenerator.Room room in rooms.KeysToList())
-            {
-                foreach (DungeonGenerator.Room neighbor in rooms.GetNeighbors(room))
-                {
-                    Vector3 roomPos = new Vector3(
-                        room.area.center.x,
-                        0,
-                        room.area.center.y
-                    );
-
-                    Vector3 neighborPos = new Vector3(
-                        neighbor.area.center.x,
-                        0,
-                        neighbor.area.center.y
-                    );
-
-                    Debug.DrawLine(roomPos, neighborPos, Color.red);
-                }
-            }
-        }
-
-        if (showDoors)
-        {
-            // Draw doors in blue
-            foreach (DungeonGenerator.Room door in doors.adjacencyList.Keys)
-            {
-                AlgorithmsUtils.DebugRectInt(door.area, Color.blue);
-            }
-        }
-
-        if (showRemovedRooms)
-        {
-            // Draw random removed rooms in red
-            foreach (DungeonGenerator.Room room in removedRooms)
-            {
-                AlgorithmsUtils.DebugRectInt(room.area, Color.red);
-            }
-        }
-
-        // Draw dungeon in dark green
-        if (showDungeonOutLine) AlgorithmsUtils.DebugRectInt(dungeon, Color.green * 0.4f);
     }
     #endregion
 
@@ -579,7 +514,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     public void ChangeRoomRemovalSize(Int32 selectedIndex)
     {
         roomSizeToBeRemoved = (Sizes)selectedIndex;
-        Debug.Log($"Enum changed to: {pathSearchingMethod}");
+        Debug.Log($"Enum changed to: {roomSizeToBeRemoved}");
     }
     #endregion
 
@@ -714,6 +649,64 @@ public class DungeonGeneratorFast : MonoBehaviour
             doorInput.text = doorSize.ToString();
         }
     }
+    public void ChangeRemovalPercentageInput(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            result = Mathf.Clamp(result, 0, 100);
+
+            // Update the value and UI
+            percentageOfRoomsToRemove = result;
+            percentageInput.text = percentageOfRoomsToRemove.ToString(); // reset UI in case we clamped it
+            percentageSlider.value = percentageOfRoomsToRemove;
+
+            Debug.Log($"Updated doorSize: {percentageOfRoomsToRemove}");
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+            percentageInput.text = percentageOfRoomsToRemove.ToString();
+        }
+    }
+    public void ChangeRemovalPercentageSlider(Single input)
+    {
+        input = Mathf.Clamp(input, 0, 100);
+
+        // Update the value and UI
+        percentageOfRoomsToRemove = input;
+        percentageInput.text = percentageOfRoomsToRemove.ToString(); // reset UI in case we clamped it
+
+        Debug.Log($"Updated doorSize: {percentageOfRoomsToRemove}");
+    }
+    public void ChangeShapeChanceInput(string input)
+    {
+        if (int.TryParse(input, out int result))
+        {
+            result = Mathf.Clamp(result, 0, 100);
+
+            // Update the value and UI
+            chanceToMakeInterestingRoom = result;
+            chanceInput.text = chanceToMakeInterestingRoom.ToString(); // reset UI in case we clamped it
+            chanceSlider.value = chanceToMakeInterestingRoom;
+
+            Debug.Log($"Updated doorSize: {chanceToMakeInterestingRoom}");
+        }
+        else
+        {
+            Debug.LogWarning("Invalid input: Not an integer");
+            chanceInput.text = chanceToMakeInterestingRoom.ToString();
+        }
+    }
+    public void ChangeShapeChanceSlider(Single input)
+    {
+        input = Mathf.Clamp(input, 0, 100);
+
+        // Update the value and UI
+        chanceToMakeInterestingRoom = input;
+        chanceInput.text = chanceToMakeInterestingRoom.ToString(); // reset UI in case we clamped it
+
+        Debug.Log($"Updated doorSize: {chanceToMakeInterestingRoom}");
+    }
     #endregion
 
     #region GetValue
@@ -727,8 +720,6 @@ public class DungeonGeneratorFast : MonoBehaviour
     #endregion
     private void Update()
     {
-        DrawRooms();
-
         // Room Min Width
         if (roomMinWidth < 3)
         {
@@ -761,9 +752,9 @@ public class DungeonGeneratorFast : MonoBehaviour
             doorInput.text = doorSize.ToString();
         }
 
-        if (seedInput.gameObject.activeSelf)
-        {
-            seedInput.text = seed.ToString();
-        }
+        //if (seedInput.gameObject.activeSelf)
+        //{
+        //    seedInput.text = seed.ToString();
+        //}
     }
 }
