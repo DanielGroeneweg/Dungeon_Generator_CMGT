@@ -441,6 +441,8 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
+
+        finishedDoors = true;
     }
     #endregion
 
