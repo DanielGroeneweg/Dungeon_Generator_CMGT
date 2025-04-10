@@ -574,7 +574,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         if (int.TryParse(input, out int result))
         {
             // Clamp to min/max
-            if (result < dungeonWidth) result = dungeonWidth;
+            result = Mathf.Clamp(roomMinWidth, 3, dungeonWidth);
 
             // Update the value and UI
             roomMinWidth = result;
@@ -593,7 +593,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         if (int.TryParse(input, out int result))
         {
             // Clamp to min/max
-            if (result < dungeonHeight) result = dungeonHeight;
+            result = Mathf.Clamp(roomMinHeight, 3, dungeonHeight);
 
             // Update the value and UI
             roomMinHeight = result;
@@ -721,10 +721,5 @@ public class DungeonGeneratorFast : MonoBehaviour
             doorSize = Mathf.Clamp(doorSize, min, max);
             doorInput.text = doorSize.ToString();
         }
-
-        //if (seedInput.gameObject.activeSelf)
-        //{
-        //    seedInput.text = seed.ToString();
-        //}
     }
 }
