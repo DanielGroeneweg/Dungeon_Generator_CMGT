@@ -495,8 +495,15 @@ public class DungeonGeneratorFast : MonoBehaviour
         if (field != null && field.FieldType == typeof(bool))
         {
             bool currentValue = (bool)field.GetValue(this);
+
             Debug.Log($"Changing '{boolName}' from {currentValue} to {!currentValue}");
             field.SetValue(this, !currentValue);
+
+            if (boolName == nameof(removeCyclingPaths) && removeCyclingPaths == false)
+            {
+                Debug.Log($"Changing '{nameof(makeNonSquareRooms)}' from {makeNonSquareRooms} to {false}");
+                makeNonSquareRooms = false;
+            }
         }
         else
         {
