@@ -706,10 +706,22 @@ public class DungeonGeneratorFast : MonoBehaviour
             roomWidthInput.text = roomMinWidth.ToString();
         }
 
+        if (roomMinWidth > dungeonWidth)
+        {
+            roomMinWidth = dungeonWidth;
+            roomWidthInput.text = roomMinWidth.ToString();
+        }
+
         // Room Min Height
         if (roomMinHeight < 3)
         {
             roomMinHeight = 3;
+            roomHeightInput.text = roomMinHeight.ToString();
+        }
+
+        if (roomMinHeight > dungeonHeight)
+        {
+            roomMinHeight = dungeonHeight;
             roomHeightInput.text = roomMinHeight.ToString();
         }
 
