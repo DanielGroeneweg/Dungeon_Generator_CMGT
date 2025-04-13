@@ -12,7 +12,8 @@ public class DungeonGenerator : MonoBehaviour
     [Header("Generation Method")]
     [SerializeField] private float timeBetweenSteps = 0.1f;
     public enum PathSearchingMethods { DepthFirst, BreadthFirst }
-    [SerializeField] private PathSearchingMethods pathSearchingMethod = PathSearchingMethods.DepthFirst;
+    [SerializeField] private bool removeCyclingPaths = true;
+    [ShowIf("removeCyclingPaths")][SerializeField] private PathSearchingMethods pathSearchingMethod = PathSearchingMethods.DepthFirst;
 
     [Header("Seed")]
     [SerializeField] private bool useSeed = false;
@@ -31,11 +32,12 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private int doorSize = 6;
 
     [Header("Generation Stats")]
-    [Range(0f, 100f)][SerializeField] private float percentageOfRoomsToRemove = 10;
+    [SerializeField] private bool removeRooms = true;
+    [ShowIf("removeRooms")][Range(0f, 100f)][SerializeField] private float percentageOfRoomsToRemove = 10f;
+    public enum Sizes { Smallest, Biggest, Random }
+    [ShowIf("removeRooms")][SerializeField] private Sizes roomSizeToBeRemoved = Sizes.Smallest;
     [SerializeField] private bool makeNonSquareRooms = false;
-    [ShowIf("makeNonSquareRooms")][RangeAttribute(0f, 1f)][SerializeField] private float chanceToMakeInterestingRoom = 0.2f;
-    public enum Sizes { Smallest, Biggest }
-    [SerializeField] private Sizes roomSizeToBeRemoved = Sizes.Smallest;
+    [ShowIf("makeNonSquareRooms")][RangeAttribute(0f, 100f)][SerializeField] private float chanceToMakeInterestingRoom = 20f;
 
     [Header("Visualization")]
     [SerializeField] private bool showRooms = true;
@@ -254,6 +256,7 @@ public class DungeonGenerator : MonoBehaviour
         {
             // Remove first room in the sorted list
             Room roomToBeDestroyed = roomList[0];
+            if (roomSizeToBeRemoved == Sizes.Random) roomToBeDestroyed = roomList[random.Next(0, roomList.Count)];
 
             List<Room> neighbors = rooms.GetNeighbors(roomToBeDestroyed);
 
@@ -526,14 +529,25 @@ public class DungeonGenerator : MonoBehaviour
 
         // Remove random rooms from the dungeon
         yield return new WaitUntil(() => finishedFindingConnections);
-        StartCoroutine(RemoveSmallestRooms());
 
-        // Generate a path through the dungeon
-        yield return new WaitUntil(() => finishedRemoval);
-        GeneratePath();
+        // Remove rooms
+        if (removeRooms)
+        {
+            StartCoroutine(RemoveSmallestRooms());
 
-        // Create doors to connect rooms to eachother
-        yield return new WaitUntil(() => finishedPathing);
+            // Generate a path through the dungeon
+            yield return new WaitUntil(() => finishedRemoval);
+        }
+
+        // Remove cyclic paths
+        if (removeCyclingPaths)
+        {
+            GeneratePath();
+
+            // Create doors to connect rooms to eachother
+            yield return new WaitUntil(() => finishedPathing);
+        }
+        
         StartCoroutine(GenerateDoors());
 
         // Make the dungeon physical

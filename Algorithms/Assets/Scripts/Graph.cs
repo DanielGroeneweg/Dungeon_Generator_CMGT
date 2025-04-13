@@ -18,6 +18,10 @@ public class Graph<T>
             adjacencyList[node] = new List<T>();
             keys.Add(node);
         }
+        else
+        {
+            Debug.LogWarning("Node is already in the graph.");
+        }
     }
     public void RemoveNode(T node)
     {

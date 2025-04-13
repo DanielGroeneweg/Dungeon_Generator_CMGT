@@ -100,6 +100,11 @@ public class DungeonVisualizing : MonoBehaviour
             roomsParentObject.transform
         );
         player.gameObject.name = "Player";
+
+        Debug.Log(rooms.adjacencyList.Count);
+        Debug.Log(doors.adjacencyList.Count);
+
+        player.InitializeDungeonData(rooms, doors);
     }
     private void GenerateFloor(DungeonGenerator.Room room, GameObject parentObject)
     {

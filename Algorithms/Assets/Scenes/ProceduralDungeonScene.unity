@@ -472,6 +472,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeBetweenSteps: 0
+  removeCyclingPaths: 1
   pathSearchingMethod: 0
   useSeed: 0
   seed: 1
