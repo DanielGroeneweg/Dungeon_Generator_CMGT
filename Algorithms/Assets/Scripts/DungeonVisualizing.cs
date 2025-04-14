@@ -12,6 +12,7 @@ public class DungeonVisualizing : MonoBehaviour
     [SerializeField] private Transform floorPrefab;
     [SerializeField] private Transform wallPrefab;
     [SerializeField] private PlayerController playerPrefab;
+    [SerializeField] private Transform[] wallAssets = new Transform[16];
 
     [Header("Stats")]
     [SerializeField] private float wallHeight = 4;
@@ -65,7 +66,7 @@ public class DungeonVisualizing : MonoBehaviour
         if (assetSpawningMethod == assetMethods.Good)
         {
             tileMapGenerator.GenerateTileMap(dungeonBounds, rooms.KeysToList(), doors.KeysToList());
-            SpawnWallsUsingTileMap(dungeonBounds);
+            StartCoroutine(SpawnWallsUsingTileMap(dungeonBounds));
         }
 
         if (assetSpawningMethod == assetMethods.Sufficient)
@@ -159,7 +160,7 @@ public class DungeonVisualizing : MonoBehaviour
     #endregion
 
     #region good
-    private void SpawnWallsUsingTileMap(RectInt dungeonBounds)
+    private IEnumerator SpawnWallsUsingTileMap(RectInt dungeonBounds)
     {
         int[,] tileMap = tileMapGenerator.GetTileMap();
 
@@ -168,15 +169,26 @@ public class DungeonVisualizing : MonoBehaviour
         foreach(Vector2 pos in dungeonBounds.allPositionsWithin)
         {
             // Don't do the bounds
-            if (pos.x == dungeonBounds.xMin || pos.y == dungeonBounds.yMin) continue;
+            if (pos.x >= dungeonBounds.xMax - 1 || pos.y >= dungeonBounds.yMax - 1) continue;
 
-            cell = new RectInt((int)pos.x, (int)pos.y, 2, 2);
-            int a = tileMap[cell.xMin, cell.yMin];
-            int b = tileMap[cell.xMax, cell.yMin];
-            int c = tileMap[cell.xMax, cell.yMin];
-            int d = tileMap[cell.xMin, cell.yMax];
+            cell = new RectInt((int)pos.x, (int)pos.y, 1, 1);
+            int a = tileMap[cell.yMin, cell.xMin];
+            int b = tileMap[cell.yMax, cell.xMin];
+            int c = tileMap[cell.yMax, cell.xMax];
+            int d = tileMap[cell.yMin, cell.xMax];
 
-            int id = a + b*2 + c*3 + d*4;
+            int id = (a << 3 | b << 2 | c << 1 | d);
+
+            if (id == 0) continue;
+
+            else
+            {
+                GameObject.Instantiate(wallAssets[id], new Vector3(cell.center.x + 0.5f, 0, cell.center.y + 0.5f), Quaternion.identity, roomsParentObject);
+            }
+
+            AlgorithmsUtils.DebugRectInt(cell, Color.yellow, 0.1f);
+
+            yield return new WaitForSeconds(TimeBetweenSteps);
         }
     }
     #endregion

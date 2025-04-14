@@ -169,7 +169,25 @@ MonoBehaviour:
   floorPrefab: {fileID: 357826911874022929, guid: 55f4d07ea4bb3584e9267accba839f09, type: 3}
   wallPrefab: {fileID: 6013996038017811537, guid: d1201545b3075da4d972e3a12f415b83, type: 3}
   playerPrefab: {fileID: 9059855493575339012, guid: a532913f6305d404d851f1eb26fb6606, type: 3}
+  wallAssets:
+  - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
+  - {fileID: 7782362095540728620, guid: cf01063069e735648ab8a1c748d2da83, type: 3}
+  - {fileID: 2600235747112749935, guid: a9b3b91ceb6f1134ca74cce01b6a78a8, type: 3}
+  - {fileID: 414930215037693129, guid: 931432e0665eb58469d2485b15077dc0, type: 3}
+  - {fileID: 5175553097967315673, guid: 1baa95304ce7d1c459443df8de1457e8, type: 3}
+  - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
+  - {fileID: 3704261836636410164, guid: c6f83813070bea041a9a0e107ab51f59, type: 3}
+  - {fileID: 4854822919998787274, guid: ae8cbe638b9f7074dbc7244fb3c26600, type: 3}
+  - {fileID: 3677567201816628487, guid: e33a7699cbf2ac441b511ab59f6078d8, type: 3}
+  - {fileID: 3419528550181042829, guid: bab40014c6bafe441b1a47834f863221, type: 3}
+  - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
+  - {fileID: 5609736035190698148, guid: 272fb9cc01e08f247b43f7e6c38dfdfb, type: 3}
+  - {fileID: 6153966049455775798, guid: 2845a60bcd2f5514e93bad2c324f8d31, type: 3}
+  - {fileID: 1336608916475551646, guid: 988bdb5b8c8e5684f82e8aa72c31960a, type: 3}
+  - {fileID: 3801860624859617898, guid: ef501ae38d35df8469fa26679054f194, type: 3}
+  - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
   wallHeight: 4
+  assetSpawningMethod: 1
   roomsParentObject: {fileID: 2059490228}
 --- !u!114 &102648841
 MonoBehaviour:
@@ -499,10 +517,10 @@ MonoBehaviour:
   roomMinHeight: 10
   wallBuffer: 1
   doorSize: 3
-  removeRooms: 1
+  removeRooms: 0
   percentageOfRoomsToRemove: 10
   roomSizeToBeRemoved: 0
-  makeNonSquareRooms: 1
+  makeNonSquareRooms: 0
   chanceToMakeInterestingRoom: 0.2
   showRooms: 1
   showDoors: 1
