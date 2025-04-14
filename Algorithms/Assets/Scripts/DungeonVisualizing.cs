@@ -7,6 +7,7 @@ public class DungeonVisualizing : MonoBehaviour
     [Header("References")]
     [SerializeField] private NavMeshSurface surface;
     [SerializeField] private TileMapGenerator tileMapGenerator;
+    [SerializeField] private GameObject generateButton = null;
 
     [Header("Prefabs")]
     [SerializeField] private Transform floorPrefab;
@@ -129,6 +130,8 @@ public class DungeonVisualizing : MonoBehaviour
         player.gameObject.name = "Player";
 
         player.InitializeDungeonData(rooms, doors);
+
+        if (generateButton != null) generateButton.SetActive(true);
     }
 
     #region sufficient

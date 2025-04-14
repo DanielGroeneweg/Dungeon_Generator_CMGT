@@ -619,7 +619,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         if (int.TryParse(input, out int result))
         {
             // Clamp to min/max
-            int min = 2;
+            int min = 1;
             int max = Mathf.Min(roomMinWidth, roomMinHeight) - wallBuffer * 2;
             result = Mathf.Clamp(result, min, max);
 
@@ -735,7 +735,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         // Door Size
         if (doorSize > roomMinWidth - wallBuffer * 2 || doorSize > roomMinHeight - wallBuffer * 2)
         {
-            int min = 2;
+            int min = 1;
             int max = Mathf.Min(roomMinWidth, roomMinHeight) - wallBuffer * 2;
             doorSize = Mathf.Clamp(doorSize, min, max);
             doorInput.text = doorSize.ToString();
