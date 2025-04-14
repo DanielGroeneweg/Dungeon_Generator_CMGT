@@ -552,7 +552,7 @@ public class DungeonGenerator : MonoBehaviour
 
         // Make the dungeon physical
         yield return new WaitUntil(() => finishedDoors);
-        GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().MakeDungeonPhysical(rooms, doors, timeBetweenSteps);
+        GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().MakeDungeonPhysical(rooms, doors, dungeon, timeBetweenSteps);
     }
     private void ResetDungeon()
     {

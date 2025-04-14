@@ -453,7 +453,7 @@ public class DungeonGeneratorFast : MonoBehaviour
         GenerateDoors();
 
         // Create physical dungeon
-        GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().MakeDungeonPhysical(rooms, doors, 0);
+        GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().MakeDungeonPhysical(rooms, doors, dungeon, 0);
     }
     private void ResetDungeon()
     {

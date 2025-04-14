@@ -6,6 +6,7 @@ public class DungeonVisualizing : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private NavMeshSurface surface;
+    [SerializeField] private TileMapGenerator tileMapGenerator;
 
     [Header("Prefabs")]
     [SerializeField] private Transform floorPrefab;
@@ -14,6 +15,8 @@ public class DungeonVisualizing : MonoBehaviour
 
     [Header("Stats")]
     [SerializeField] private float wallHeight = 4;
+    public enum assetMethods {Sufficient, Good};
+    public assetMethods assetSpawningMethod = assetMethods.Sufficient;
 
     [Header("Hierarchy")]
     [SerializeField] private Transform roomsParentObject;
@@ -33,14 +36,14 @@ public class DungeonVisualizing : MonoBehaviour
     {
         discoveredPositions= new HashSet<Vector2>();
     }
-    public void MakeDungeonPhysical(Graph<DungeonGenerator.Room> roomGraph, Graph<DungeonGenerator.Room> doorGraph, float time)
+    public void MakeDungeonPhysical(Graph<DungeonGenerator.Room> roomGraph, Graph<DungeonGenerator.Room> doorGraph, RectInt dungeonBounds, float time)
     {
         TimeBetweenSteps = time;
 
         rooms = roomGraph;
         doors = doorGraph;
 
-        StartCoroutine(Generate());
+        StartCoroutine(Generate(dungeonBounds));
     }
     public void ClearDungeon()
     {
@@ -57,38 +60,47 @@ public class DungeonVisualizing : MonoBehaviour
             Destroy(child.gameObject);
         }
     }
-    private IEnumerator Generate()
+    private IEnumerator Generate(RectInt dungeonBounds)
     {
-        // Save door positions
-        foreach (DungeonGenerator.Room door in doors.KeysToList())
+        if (assetSpawningMethod == assetMethods.Good)
         {
-            foreach(Vector2 position in door.area.allPositionsWithin)
+            tileMapGenerator.GenerateTileMap(dungeonBounds, rooms.KeysToList(), doors.KeysToList());
+            SpawnWallsUsingTileMap(dungeonBounds);
+        }
+
+        if (assetSpawningMethod == assetMethods.Sufficient)
+        {
+            // Save door positions
+            foreach (DungeonGenerator.Room door in doors.KeysToList())
             {
-                discoveredPositions.Add(position);
+                foreach (Vector2 position in door.area.allPositionsWithin)
+                {
+                    discoveredPositions.Add(position);
+                }
             }
+
+            // Room generating
+            foreach (DungeonGenerator.Room room in rooms.KeysToList())
+            {
+                // Create parent object for this room
+                GameObject parentObject = new GameObject("Room_" + room.area.xMin + "_" + room.area.yMin + "_" + room.area.xMax + "_" + room.area.yMax);
+                parentObject.transform.parent = roomsParentObject;
+
+                // Generate floor for this room
+                GenerateFloor(room, parentObject);
+
+                // Generate walls for this room
+                StartCoroutine(MakeWalls(room, parentObject));
+
+                // Coroutine
+                yield return new WaitForSeconds(TimeBetweenSteps);
+            }
+
+            yield return new WaitUntil(() => (finishedWallsCount == rooms.KeysToList().Count && finishedFloorsCount == rooms.KeysToList().Count));
+
+            // Bake NavMesh
+            surface.BuildNavMesh();
         }
-
-        // Room generating
-        foreach(DungeonGenerator.Room room in rooms.KeysToList())
-        {
-            // Create parent object for this room
-            GameObject parentObject = new GameObject("Room_" + room.area.xMin + "_" + room.area.yMin + "_" + room.area.xMax + "_" + room.area.yMax);
-            parentObject.transform.parent = roomsParentObject;
-
-            // Generate floor for this room
-            GenerateFloor(room, parentObject);
-
-            // Generate walls for this room
-            StartCoroutine(MakeWalls(room, parentObject));
-
-            // Coroutine
-            yield return new WaitForSeconds(TimeBetweenSteps);
-        }
-
-        yield return new WaitUntil(() => (finishedWallsCount == rooms.KeysToList().Count && finishedFloorsCount == rooms.KeysToList().Count));
-
-        // Bake NavMesh
-        surface.BuildNavMesh();
 
         // Spawn player in the first room of the list
         DungeonGenerator.Room firstRoom = rooms.KeysToList()[0];
@@ -101,11 +113,10 @@ public class DungeonVisualizing : MonoBehaviour
         );
         player.gameObject.name = "Player";
 
-        Debug.Log(rooms.adjacencyList.Count);
-        Debug.Log(doors.adjacencyList.Count);
-
         player.InitializeDungeonData(rooms, doors);
     }
+
+    #region sufficient
     private void GenerateFloor(DungeonGenerator.Room room, GameObject parentObject)
     {
         Transform obj = GameObject.Instantiate(
@@ -145,4 +156,28 @@ public class DungeonVisualizing : MonoBehaviour
         }
         finishedWallsCount++;
     }
+    #endregion
+
+    #region good
+    private void SpawnWallsUsingTileMap(RectInt dungeonBounds)
+    {
+        int[,] tileMap = tileMapGenerator.GetTileMap();
+
+        RectInt cell;
+
+        foreach(Vector2 pos in dungeonBounds.allPositionsWithin)
+        {
+            // Don't do the bounds
+            if (pos.x == dungeonBounds.xMin || pos.y == dungeonBounds.yMin) continue;
+
+            cell = new RectInt((int)pos.x, (int)pos.y, 2, 2);
+            int a = tileMap[cell.xMin, cell.yMin];
+            int b = tileMap[cell.xMax, cell.yMin];
+            int c = tileMap[cell.xMax, cell.yMin];
+            int d = tileMap[cell.xMin, cell.yMax];
+
+            int id = a + b*2 + c*3 + d*4;
+        }
+    }
+    #endregion
 }
