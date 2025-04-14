@@ -13,6 +13,7 @@ public class DungeonVisualizing : MonoBehaviour
     [SerializeField] private Transform wallPrefab;
     [SerializeField] private PlayerController playerPrefab;
     [SerializeField] private Transform[] wallAssets = new Transform[16];
+    [SerializeField] private Transform betterFloorPrefab;
 
     [Header("Stats")]
     [SerializeField] private float wallHeight = 4;
@@ -33,8 +34,13 @@ public class DungeonVisualizing : MonoBehaviour
 
     private int finishedWallsCount = 0;
     private int finishedFloorsCount = 0;
+    private bool finishedWalls = false;
+    private bool finishedFloors = false;
+
+    private System.Random random;
     private void Start()
     {
+        random = new System.Random();
         discoveredPositions= new HashSet<Vector2>();
     }
     public void MakeDungeonPhysical(Graph<DungeonGenerator.Room> roomGraph, Graph<DungeonGenerator.Room> doorGraph, RectInt dungeonBounds, float time)
@@ -55,6 +61,9 @@ public class DungeonVisualizing : MonoBehaviour
         finishedWallsCount = 0;
         finishedFloorsCount = 0;
 
+        finishedWalls = false;
+        finishedFloors = false;
+
         // Remove all assets
         foreach (Transform child in roomsParentObject)
         {
@@ -67,6 +76,9 @@ public class DungeonVisualizing : MonoBehaviour
         {
             tileMapGenerator.GenerateTileMap(dungeonBounds, rooms.KeysToList(), doors.KeysToList());
             StartCoroutine(SpawnWallsUsingTileMap(dungeonBounds));
+            SpawnFloorUsingTileMap(dungeonBounds);
+
+            yield return new WaitUntil(() => (finishedWalls && finishedFloors));
         }
 
         if (assetSpawningMethod == assetMethods.Sufficient)
@@ -98,10 +110,10 @@ public class DungeonVisualizing : MonoBehaviour
             }
 
             yield return new WaitUntil(() => (finishedWallsCount == rooms.KeysToList().Count && finishedFloorsCount == rooms.KeysToList().Count));
-
-            // Bake NavMesh
-            surface.BuildNavMesh();
         }
+
+        // Bake NavMesh
+        surface.BuildNavMesh();
 
         // Spawn player in the first room of the list
         DungeonGenerator.Room firstRoom = rooms.KeysToList()[0];
@@ -160,6 +172,7 @@ public class DungeonVisualizing : MonoBehaviour
     #endregion
 
     #region good
+    private int wallCount = 0;
     private IEnumerator SpawnWallsUsingTileMap(RectInt dungeonBounds)
     {
         int[,] tileMap = tileMapGenerator.GetTileMap();
@@ -179,7 +192,8 @@ public class DungeonVisualizing : MonoBehaviour
 
             int id = (a << 3 | b << 2 | c << 1 | d);
 
-            if (id == 0) continue;
+            // Skip empties
+            if (id == 0 || id == 5 || id == 10 || id == 15) continue;
 
             else
             {
@@ -188,7 +202,82 @@ public class DungeonVisualizing : MonoBehaviour
 
             AlgorithmsUtils.DebugRectInt(cell, Color.yellow, 0.1f);
 
+            wallCount++;
+            if (wallCount == 10)
+            {
+                wallCount = 0;
+                yield return new WaitForSeconds(0);
+            }
+        }
+
+        finishedWalls = true;
+    }
+    private void SpawnFloorUsingTileMap(RectInt dungeonBounds)
+    {
+        int[,] tileMap = tileMapGenerator.GetTileMap();
+
+        HashSet<Vector2> discovered = new HashSet<Vector2>();
+        Queue<Vector2> queue = new Queue<Vector2>();
+
+        Vector2 firstPos = new Vector2((int)rooms.KeysToList()[0].area.center.x, (int)rooms.KeysToList()[0].area.center.y);
+        queue.Enqueue(firstPos);
+        discovered.Add(firstPos);
+        StartCoroutine(RecursiveBFS(queue, discovered, dungeonBounds, tileMap));
+    }
+    private int floorCount = 0;
+    private IEnumerator RecursiveBFS(Queue<Vector2> queue, HashSet<Vector2> discovered, RectInt dungeonBounds, int[,] tileMap)
+    {
+        Vector2 pos = queue.Dequeue();
+
+        // Spawn Floor Asset
+        GameObject.Instantiate(betterFloorPrefab, new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f), Quaternion.identity, roomsParentObject);
+
+        // Get all 'neighbors' of the vector
+        List<Vector2> adjacentVecs = new List<Vector2>();
+        if (pos.x - 1 >= dungeonBounds.xMin)
+        {
+            Vector2 targetPos = new Vector2(pos.x - 1, pos.y);
+            adjacentVecs.Add(targetPos);
+        }
+        if (pos.x + 1 <= dungeonBounds.xMax - 1)
+        {
+            Vector2 targetPos = new Vector2(pos.x + 1, pos.y);
+            adjacentVecs.Add(targetPos);
+        }
+        if (pos.y - 1 >= dungeonBounds.yMin)
+        {
+            Vector2 targetPos = new Vector2(pos.x, pos.y - 1);
+            adjacentVecs.Add(targetPos);
+        }
+        if (pos.y + 1 <= dungeonBounds.yMax - 1)
+        {
+            Vector2 targetPos = new Vector2(pos.x, pos.y + 1);
+            adjacentVecs.Add(targetPos);
+        }
+
+        foreach (Vector2 vec in adjacentVecs)
+        {
+            if (!discovered.Contains(vec))
+            {
+                if (tileMap[(int)vec.y, (int)vec.x] == 0)
+                {
+                    discovered.Add(vec);
+                    queue.Enqueue(vec);
+                }
+            }
+        }
+        floorCount++;
+        if (floorCount == 25)
+        {
             yield return new WaitForSeconds(TimeBetweenSteps);
+            floorCount = 0;
+        }
+        
+        if (queue.Count > 0) StartCoroutine(RecursiveBFS(queue, discovered, dungeonBounds, tileMap));
+        else
+        {
+            yield return new WaitForSeconds(TimeBetweenSteps);
+            finishedFloors = true;
         }
     }
     #endregion

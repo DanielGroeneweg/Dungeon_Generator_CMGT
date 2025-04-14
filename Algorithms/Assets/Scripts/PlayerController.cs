@@ -34,15 +34,12 @@ public class PlayerController : MonoBehaviour
                 clickPosition = clickWorldPosition;
 
                 // Trigger an unity event to notify other scripts about the click here
-                //OnClick.Invoke(clickPosition);
+                OnClick.Invoke(clickPosition);
 
                 // Create path
                 PathFinding();
             }
         }
-
-        // Add visual debugging here
-        Debug.DrawLine(Camera.main.transform.position, clickPosition);
     }
     public void InitializeDungeonData(Graph<DungeonGenerator.Room> _rooms, Graph<DungeonGenerator.Room> _doors)
     {
@@ -61,8 +58,6 @@ public class PlayerController : MonoBehaviour
                 rooms.AddNeighbor(door, neighbor);
             }
         }
-
-        Debug.Log(rooms.KeysToList().Count == _rooms.KeysToList().Count + _doors.KeysToList().Count);
     }
     public void GoToDestination(Vector3 destination)
     {

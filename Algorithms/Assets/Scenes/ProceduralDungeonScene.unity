@@ -186,6 +186,7 @@ MonoBehaviour:
   - {fileID: 1336608916475551646, guid: 988bdb5b8c8e5684f82e8aa72c31960a, type: 3}
   - {fileID: 3801860624859617898, guid: ef501ae38d35df8469fa26679054f194, type: 3}
   - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
+  betterFloorPrefab: {fileID: 4786606637186289427, guid: ee2ec93b0f8db314d99c5c4ca581bc18, type: 3}
   wallHeight: 4
   assetSpawningMethod: 1
   roomsParentObject: {fileID: 2059490228}
@@ -517,11 +518,11 @@ MonoBehaviour:
   roomMinHeight: 10
   wallBuffer: 1
   doorSize: 3
-  removeRooms: 0
+  removeRooms: 1
   percentageOfRoomsToRemove: 10
   roomSizeToBeRemoved: 0
-  makeNonSquareRooms: 0
-  chanceToMakeInterestingRoom: 0.2
+  makeNonSquareRooms: 1
+  chanceToMakeInterestingRoom: 100
   showRooms: 1
   showDoors: 1
   showDungeonOutLine: 1
@@ -576,75 +577,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2050383094
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2050383095}
-  - component: {fileID: 2050383096}
-  m_Layer: 0
-  m_Name: FastDungeonGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &2050383095
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050383094}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2050383096
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050383094}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 459ba0d9fb7000a469bfc8d998f9d3f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  removeCyclingPaths: 1
-  pathSearchingMethod: 0
-  useSeed: 0
-  seed: 0
-  dungeonWidth: 150
-  dungeonHeight: 100
-  roomMinWidth: 10
-  roomMinHeight: 10
-  wallBuffer: 1
-  doorSize: 3
-  removeRooms: 1
-  percentageOfRoomsToRemove: 10
-  roomSizeToBeRemoved: 0
-  makeNonSquareRooms: 1
-  chanceToMakeInterestingRoom: 20
-  seedInput: {fileID: 0}
-  dungeonWidthInput: {fileID: 0}
-  dungeonHeightInput: {fileID: 0}
-  roomWidthInput: {fileID: 0}
-  roomHeightInput: {fileID: 0}
-  doorInput: {fileID: 0}
-  percentageSlider: {fileID: 0}
-  percentageInput: {fileID: 0}
-  chanceSlider: {fileID: 0}
-  chanceInput: {fileID: 0}
 --- !u!1 &2059490227
 GameObject:
   m_ObjectHideFlags: 0
@@ -748,7 +680,6 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 563225899}
-  - {fileID: 2050383095}
   - {fileID: 102648839}
   - {fileID: 2059490228}
   - {fileID: 2068710023}

@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4038827269175978573, guid: 8c9cc736ad3c4ab4087aade106396a5d, type: 3}
       propertyPath: m_Name
-      value: 4_WallEnd Variant
+      value: 8_WallEnd Variant
       objectReference: {fileID: 0}
     - target: {fileID: 5677755348485697194, guid: 8c9cc736ad3c4ab4087aade106396a5d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -51,6 +51,14 @@ PrefabInstance:
     - target: {fileID: 5677755348485697194, guid: 8c9cc736ad3c4ab4087aade106396a5d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7444988251240414510, guid: 8c9cc736ad3c4ab4087aade106396a5d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7444988251240414510, guid: 8c9cc736ad3c4ab4087aade106396a5d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7444988251240414510, guid: 8c9cc736ad3c4ab4087aade106396a5d, type: 3}
       propertyPath: m_LocalRotation.w

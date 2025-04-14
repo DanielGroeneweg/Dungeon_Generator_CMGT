@@ -2,17 +2,14 @@ using System;
 using System.Text;
 using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.Events;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine.Events;
 [DefaultExecutionOrder(3)]
 public class TileMapGenerator : MonoBehaviour
 {
-
-    [SerializeField]
-    private UnityEvent onGenerateTileMap;
-
-    public int[,] _tileMap;
-
+    [SerializeField] public UnityEvent OnTileMapGenerate;
+    [DoNotSerialize] public int[,] _tileMap;
     public void GenerateTileMap(RectInt dungeonBounds, List<DungeonGenerator.Room> rooms, List<DungeonGenerator.Room> doors)
     {
         int[,] tileMap = new int[dungeonBounds.height, dungeonBounds.width];
@@ -36,9 +33,8 @@ public class TileMapGenerator : MonoBehaviour
 
         _tileMap = tileMap;
 
-        onGenerateTileMap.Invoke();
+        OnTileMapGenerate?.Invoke();
     }
-
     public string ToString(bool flip)
     {
         if (_tileMap == null) return "Tile map not generated yet.";
@@ -63,17 +59,13 @@ public class TileMapGenerator : MonoBehaviour
 
         return sb.ToString();
     }
-
     public int[,] GetTileMap()
     {
         return _tileMap.Clone() as int[,];
     }
-
     [Button]
     public void PrintTileMap()
     {
         Debug.Log(ToString(true));
     }
-
-
 }

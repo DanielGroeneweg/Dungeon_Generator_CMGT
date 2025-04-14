@@ -9,6 +9,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 977137720429762795, guid: a9b3b91ceb6f1134ca74cce01b6a78a8, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 977137720429762795, guid: a9b3b91ceb6f1134ca74cce01b6a78a8, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.5000003
       objectReference: {fileID: 0}
@@ -74,7 +78,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5967930082345930632, guid: a9b3b91ceb6f1134ca74cce01b6a78a8, type: 3}
       propertyPath: m_Name
-      value: 2_WallEnd Variant
+      value: 1_WallEnd Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
