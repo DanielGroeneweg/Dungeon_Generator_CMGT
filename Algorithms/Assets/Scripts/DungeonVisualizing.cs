@@ -50,6 +50,8 @@ public class DungeonVisualizing : MonoBehaviour
         rooms = roomGraph;
         doors = doorGraph;
 
+        Camera.main.transform.position = new Vector3(dungeonBounds.center.x, Camera.main.transform.position.y, dungeonBounds.center.y);
+
         StartCoroutine(Generate(dungeonBounds));
     }
     public void ClearDungeon()
