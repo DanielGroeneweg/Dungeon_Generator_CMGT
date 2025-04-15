@@ -973,19 +973,19 @@ MonoBehaviour:
   wallAssets:
   - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
   - {fileID: 1960042792130460202, guid: 60ce7bae2f4c787428d29ea44304cd8e, type: 3}
-  - {fileID: 2600235747112749935, guid: cf01063069e735648ab8a1c748d2da83, type: 3}
-  - {fileID: 414930215037693129, guid: 2845a60bcd2f5514e93bad2c324f8d31, type: 3}
-  - {fileID: 5175553097967315673, guid: e33a7699cbf2ac441b511ab59f6078d8, type: 3}
+  - {fileID: 2600235747112749935, guid: a9b3b91ceb6f1134ca74cce01b6a78a8, type: 3}
+  - {fileID: 414930215037693129, guid: 931432e0665eb58469d2485b15077dc0, type: 3}
+  - {fileID: 5175553097967315673, guid: 1baa95304ce7d1c459443df8de1457e8, type: 3}
   - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
   - {fileID: 3704261836636410164, guid: c6f83813070bea041a9a0e107ab51f59, type: 3}
-  - {fileID: 3463207540844349398, guid: ef501ae38d35df8469fa26679054f194, type: 3}
-  - {fileID: 3677567201816628487, guid: 1baa95304ce7d1c459443df8de1457e8, type: 3}
+  - {fileID: 8242672131392712368, guid: 5e84532ca4c9bd749b83ca5b9d3c0458, type: 3}
+  - {fileID: 3677567201816628487, guid: e33a7699cbf2ac441b511ab59f6078d8, type: 3}
   - {fileID: 3419528550181042829, guid: bab40014c6bafe441b1a47834f863221, type: 3}
   - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
   - {fileID: 5609736035190698148, guid: 272fb9cc01e08f247b43f7e6c38dfdfb, type: 3}
-  - {fileID: 782032214438692942, guid: 092849deac0db184fad43a3146dfe47e, type: 3}
+  - {fileID: 3454710007015695083, guid: 092849deac0db184fad43a3146dfe47e, type: 3}
   - {fileID: 1336608916475551646, guid: 988bdb5b8c8e5684f82e8aa72c31960a, type: 3}
-  - {fileID: 3801860624859617898, guid: ae8cbe638b9f7074dbc7244fb3c26600, type: 3}
+  - {fileID: 3801860624859617898, guid: ef501ae38d35df8469fa26679054f194, type: 3}
   - {fileID: 2878497128050032797, guid: 76bb09cb4c27d8a4696214dce0326bdd, type: 3}
   betterFloorPrefab: {fileID: 4786606637186289427, guid: ee2ec93b0f8db314d99c5c4ca581bc18, type: 3}
   wallHeight: 4
@@ -13361,7 +13361,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
+  m_VoxelSize: 0.1
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
