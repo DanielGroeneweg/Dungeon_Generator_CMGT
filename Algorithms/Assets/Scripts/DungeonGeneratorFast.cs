@@ -457,6 +457,7 @@ public class DungeonGeneratorFast : MonoBehaviour
     }
     private void ResetDungeon()
     {
+        StopAllCoroutines();
         GameObject.Find("PhysicalGenerator").GetComponent<DungeonVisualizing>().ClearDungeon();
 
         // Reset lists

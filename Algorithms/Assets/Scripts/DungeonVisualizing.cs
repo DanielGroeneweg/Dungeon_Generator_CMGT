@@ -180,6 +180,9 @@ public class DungeonVisualizing : MonoBehaviour
     private int wallCount = 0;
     private IEnumerator SpawnWallsUsingTileMap(RectInt dungeonBounds)
     {
+        Transform wallsParent = new GameObject("WallParent").transform;
+        wallsParent.parent = roomsParentObject;
+
         int[,] tileMap = tileMapGenerator.GetTileMap();
 
         RectInt cell;
@@ -202,7 +205,7 @@ public class DungeonVisualizing : MonoBehaviour
 
             else
             {
-                GameObject.Instantiate(wallAssets[id], new Vector3(cell.center.x + 0.5f, 0, cell.center.y + 0.5f), Quaternion.identity, roomsParentObject);
+                GameObject.Instantiate(wallAssets[id], new Vector3(cell.center.x + 0.5f, 0, cell.center.y + 0.5f), Quaternion.identity, wallsParent);
             }
 
             AlgorithmsUtils.DebugRectInt(cell, Color.yellow, 0.1f);
@@ -219,6 +222,9 @@ public class DungeonVisualizing : MonoBehaviour
     }
     private void SpawnFloorUsingTileMap(RectInt dungeonBounds)
     {
+        Transform floorParent = new GameObject("FloorParent").transform;
+        floorParent.parent = roomsParentObject;
+
         int[,] tileMap = tileMapGenerator.GetTileMap();
 
         HashSet<Vector2> discovered = new HashSet<Vector2>();
@@ -227,15 +233,15 @@ public class DungeonVisualizing : MonoBehaviour
         Vector2 firstPos = new Vector2((int)rooms.KeysToList()[0].area.center.x, (int)rooms.KeysToList()[0].area.center.y);
         queue.Enqueue(firstPos);
         discovered.Add(firstPos);
-        StartCoroutine(RecursiveBFS(queue, discovered, dungeonBounds, tileMap));
+        StartCoroutine(RecursiveBFS(queue, discovered, dungeonBounds, tileMap, floorParent));
     }
     private int floorCount = 0;
-    private IEnumerator RecursiveBFS(Queue<Vector2> queue, HashSet<Vector2> discovered, RectInt dungeonBounds, int[,] tileMap)
+    private IEnumerator RecursiveBFS(Queue<Vector2> queue, HashSet<Vector2> discovered, RectInt dungeonBounds, int[,] tileMap, Transform parent)
     {
         Vector2 pos = queue.Dequeue();
 
         // Spawn Floor Asset
-        GameObject.Instantiate(betterFloorPrefab, new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f), Quaternion.identity, roomsParentObject);
+        GameObject.Instantiate(betterFloorPrefab, new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f), Quaternion.identity, parent);
 
         // Get all 'neighbors' of the vector
         List<Vector2> adjacentVecs = new List<Vector2>();
@@ -278,7 +284,7 @@ public class DungeonVisualizing : MonoBehaviour
             floorCount = 0;
         }
         
-        if (queue.Count > 0) StartCoroutine(RecursiveBFS(queue, discovered, dungeonBounds, tileMap));
+        if (queue.Count > 0) StartCoroutine(RecursiveBFS(queue, discovered, dungeonBounds, tileMap, parent));
         else
         {
             yield return new WaitForSeconds(TimeBetweenSteps);
