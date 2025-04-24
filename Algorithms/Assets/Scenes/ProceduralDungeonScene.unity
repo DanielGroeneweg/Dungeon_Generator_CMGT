@@ -219,7 +219,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileMapGenerator: {fileID: 102648841}
   path: []
-  algorithm: 0
+  algorithm: 2
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -308,7 +308,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 75, y: 100, z: 50}
+  m_LocalPosition: {x: 75, y: 25, z: 50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -541,16 +541,16 @@ MonoBehaviour:
   pathSearchingMethod: 0
   useSeed: 0
   seed: 1
-  dungeonWidth: 150
-  dungeonHeight: 100
-  roomMinWidth: 10
-  roomMinHeight: 10
+  dungeonWidth: 50
+  dungeonHeight: 50
+  roomMinWidth: 5
+  roomMinHeight: 5
   wallBuffer: 1
   doorSize: 3
   removeRooms: 1
   percentageOfRoomsToRemove: 100
   roomSizeToBeRemoved: 2
-  makeNonSquareRooms: 0
+  makeNonSquareRooms: 1
   chanceToMakeInterestingRoom: 100
   showRooms: 0
   showDoors: 0

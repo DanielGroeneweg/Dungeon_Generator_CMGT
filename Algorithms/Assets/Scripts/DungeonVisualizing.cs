@@ -124,7 +124,7 @@ public class DungeonVisualizing : MonoBehaviour
         Vector2 pos = firstRoom.area.center;
         player = GameObject.Instantiate(
             playerPrefab,
-            new Vector3(pos.x, 0.1f, pos.y),
+            new Vector3(pos.x, playerPrefab.transform.localScale.y, pos.y),
             Quaternion.identity,
             roomsParentObject.transform
         );

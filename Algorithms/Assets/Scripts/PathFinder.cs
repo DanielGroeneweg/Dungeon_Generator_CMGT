@@ -30,37 +30,44 @@ public class PathFinder : MonoBehaviour
         {
             if (tileMap[(int)pos.y, (int)pos.x] == 0)
             {
-                graph.AddNode(new Vector3(pos.x, 0, pos.y));
+                graph.AddNode(new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f));
 
-                List<Vector2> neighbors = new List<Vector2>();
+                List<Vector2Int> neighbors = new List<Vector2Int>();
 
                 // Diagonal
-                neighbors.Add(new Vector2((int)pos.x - 1, (int)pos.y - 1));
-                neighbors.Add(new Vector2((int)pos.x - 1, (int)pos.y + 1));
-                neighbors.Add(new Vector2((int)pos.x + 1, (int)pos.y - 1));
-                neighbors.Add(new Vector2((int)pos.x + 1, (int)pos.y + 1));
+                neighbors.Add(new Vector2Int((int)pos.x - 1, (int)pos.y - 1));
+                neighbors.Add(new Vector2Int((int)pos.x - 1, (int)pos.y + 1));
+                neighbors.Add(new Vector2Int((int)pos.x + 1, (int)pos.y - 1));
+                neighbors.Add(new Vector2Int((int)pos.x + 1, (int)pos.y + 1));
 
                 // Horizontal and Vertical
-                neighbors.Add(new Vector2((int)pos.x, (int)pos.y - 1));
-                neighbors.Add(new Vector2((int)pos.x, (int)pos.y + 1));
-                neighbors.Add(new Vector2((int)pos.x - 1, (int)pos.y));
-                neighbors.Add(new Vector2((int)pos.x + 1, (int)pos.y));
+                neighbors.Add(new Vector2Int((int)pos.x, (int)pos.y - 1));
+                neighbors.Add(new Vector2Int((int)pos.x, (int)pos.y + 1));
+                neighbors.Add(new Vector2Int((int)pos.x - 1, (int)pos.y));
+                neighbors.Add(new Vector2Int((int)pos.x + 1, (int)pos.y));
 
-                foreach(Vector2 position in neighbors)
+                foreach(Vector2Int position in neighbors)
                 {
-                    TryConnectNeighbor((int)position.x, (int)position.y, dungeonBounds, new Vector3(pos.x, 0, pos.y), tileMap);
+                    TryConnectNeighbor(
+                        position.x, position.y,
+                        new Vector3(pos.x + 0.5f, 0, pos.y + 0.5f),
+                        new Vector2(position.x - pos.x, position.y - pos.y),
+                        dungeonBounds, tileMap
+                    );
                 }
             }
         }
     }
-    private void TryConnectNeighbor(int nx, int ny, RectInt dungeonBounds, Vector3 currentPos, int[,] tileMap)
+    private void TryConnectNeighbor(int nx, int ny, Vector3 currentPos, Vector2 XYDifs, RectInt dungeonBounds, int[,] tileMap)
     {
         if (nx >= dungeonBounds.xMin && nx < dungeonBounds.xMax &&
             ny >= dungeonBounds.yMin && ny < dungeonBounds.yMax)
         {
             if (tileMap[ny, nx] == 1) return;
 
-            Vector3 neighborPos = new Vector3(nx, 0, ny);
+            if (tileMap[(int)(ny - XYDifs.y), nx] == 1 || tileMap[ny, (int)(nx - XYDifs.x)  ] == 1) return;
+
+            Vector3 neighborPos = new Vector3(nx + 0.5f, 0, ny + 0.5f);
             graph.AddNeighbor(currentPos, neighborPos);
         }
     }
@@ -117,7 +124,7 @@ public class PathFinder : MonoBehaviour
 
             foreach (Vector3 neighbor in graph.GetNeighbors(node))
             {
-                if (discovered.Contains(neighbor)) continue;
+                if (discovered.Contains(neighbor) || nodeParents.ContainsKey(neighbor)) continue;
 
                 queue.Enqueue(neighbor);
                 nodeParents.Add(neighbor, node);
@@ -179,8 +186,6 @@ public class PathFinder : MonoBehaviour
         Dictionary<Vector3, Vector3> nodeParents = new Dictionary<Vector3, Vector3>();
         Dictionary<Vector3, float> nodeCosts = new Dictionary<Vector3, float>();
 
-        float estimate = EstimateDistance(start, end);
-
         discovered.Clear();
 
         nodeCosts.Add(start, 0);
@@ -217,11 +222,9 @@ public class PathFinder : MonoBehaviour
                 {
                     if (discovered.Contains(neighbor)) continue;
 
-                    if (nodeCosts[node] + Cost(node, neighbor) + Cost(neighbor, end) > estimate) continue;
-
                     nodeParents.Add(neighbor, node);
                     nodeCosts.Add(neighbor, nodeCosts[node] + Cost(node, neighbor));
-                    priorityQueue.Add((neighbor, nodeCosts[neighbor]));
+                    priorityQueue.Add((neighbor, nodeCosts[neighbor] + Heuristic(neighbor, end)));
                 }
             }
 
@@ -237,13 +240,6 @@ public class PathFinder : MonoBehaviour
     public float Heuristic(Vector3 from, Vector3 to)
     {
         return Vector3.Distance(from, to);
-    }
-    public float EstimateDistance(Vector3 from, Vector3 to)
-    {
-        return
-            (Mathf.Max(Mathf.Abs(to.x), Mathf.Abs(from.x)) - Mathf.Min(Mathf.Abs(to.x), Mathf.Abs(from.x))) +
-            (Mathf.Max(Mathf.Abs(to.y), Mathf.Abs(from.y)) - Mathf.Min(Mathf.Abs(to.y), Mathf.Abs(from.y))) +
-            (Mathf.Max(Mathf.Abs(to.z), Mathf.Abs(from.z)) - Mathf.Min(Mathf.Abs(to.z), Mathf.Abs(from.z)));
     }
     List<Vector3> ReconstructPath(Dictionary<Vector3, Vector3> parentMap, Vector3 start, Vector3 end)
     {
