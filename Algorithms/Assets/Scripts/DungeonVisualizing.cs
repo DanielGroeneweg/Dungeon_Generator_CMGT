@@ -8,11 +8,12 @@ public class DungeonVisualizing : MonoBehaviour
     [SerializeField] private NavMeshSurface surface;
     [SerializeField] private TileMapGenerator tileMapGenerator;
     [SerializeField] private GameObject generateButton = null;
+    [SerializeField] private PathFinder pathFinder;
 
     [Header("Prefabs")]
     [SerializeField] private Transform floorPrefab;
     [SerializeField] private Transform wallPrefab;
-    [SerializeField] private PlayerController playerPrefab;
+    [SerializeField] private FollowPathController playerPrefab;
     [SerializeField] private Transform[] wallAssets = new Transform[16];
     [SerializeField] private Transform betterFloorPrefab;
 
@@ -31,7 +32,7 @@ public class DungeonVisualizing : MonoBehaviour
 
     private HashSet<Vector2> discoveredPositions;
 
-    private PlayerController player;
+    private FollowPathController player;
 
     private int finishedWallsCount = 0;
     private int finishedFloorsCount = 0;
@@ -128,8 +129,11 @@ public class DungeonVisualizing : MonoBehaviour
             roomsParentObject.transform
         );
         player.gameObject.name = "Player";
+        player.FindPathFinder(pathFinder);
 
-        player.InitializeDungeonData(rooms, doors);
+        GameObject.Find("Main Camera").GetComponent<MouseClickController>().InitializePlayer(player);
+
+        pathFinder.InitializeDungeon(dungeonBounds);
 
         if (generateButton != null) generateButton.SetActive(true);
     }

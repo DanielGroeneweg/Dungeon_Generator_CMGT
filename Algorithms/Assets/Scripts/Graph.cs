@@ -1,12 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class Graph<T>
 {
     public Dictionary<T, List<T>> adjacencyList;
-    private List<T> keys;
-    public Graph() { adjacencyList = new Dictionary<T, List<T>>(); keys = new List<T>(); }
+    public Graph() { adjacencyList = new Dictionary<T, List<T>>(); }
     /// <summary>
     /// Adds the node to the list without any connections made
     /// </summary>
@@ -16,7 +14,6 @@ public class Graph<T>
         if (!adjacencyList.ContainsKey(node))
         {
             adjacencyList[node] = new List<T>();
-            keys.Add(node);
         }
         else
         {
@@ -27,7 +24,6 @@ public class Graph<T>
     {
         RemoveFromNeighbors(node);
         adjacencyList.Remove(node);
-        keys.Remove(node);
     }
     /// <summary>
     /// Creates a connection between two nodes, making them neighbors
@@ -46,7 +42,6 @@ public class Graph<T>
 
         if (!adjacencyList.ContainsKey(toNode))
         {
-            //Debug.Log("to node does not exist in the graph.");
             return;
         }
 
@@ -107,6 +102,14 @@ public class Graph<T>
     {
         foreach (T key in adjacencyList.Keys) adjacencyList[key].Clear();
     }
+    public void Clear()
+    {
+        List<T> list = KeysToList();
+        for (int i = list.Count - 1; i >= 0; i--)
+        {
+            list.RemoveAt(i);
+        }
+    }
     public void PrintGraph()
     {
         foreach (T key in adjacencyList.Keys)
@@ -126,7 +129,7 @@ public class Graph<T>
     /// <returns></returns>
     public List<T> KeysToList()
     {
-        return keys;
+        return new List<T>(adjacencyList.Keys);
     }
     /// <summary>
     /// Uses Depth First Searching to create a spanning tree without loops. Requires connections to already exist

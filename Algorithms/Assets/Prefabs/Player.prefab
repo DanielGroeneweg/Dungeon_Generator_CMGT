@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 3767229776181832726}
   - component: {fileID: 695795337484281629}
   - component: {fileID: 5534712496051572003}
-  - component: {fileID: 9059855493575339012}
   - component: {fileID: 9007828967434118151}
+  - component: {fileID: 5618745960327302553}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -112,35 +112,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &9059855493575339012
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6090666265108363698}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ad4610aedcbd394c94eda6c911346e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  clickPosition: {x: 0, y: 0, z: 0}
-  OnClick:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 9059855493575339012}
-        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: GoToDestination
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  navMeshAgent: {fileID: 9007828967434118151}
 --- !u!195 &9007828967434118151
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -163,3 +134,18 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &5618745960327302553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6090666265108363698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48351403f7b9be64f8a60f4440ff34f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pathFinding: 1
+  pathFinder: {fileID: 0}
+  speed: 5

@@ -4,11 +4,9 @@ using NaughtyAttributes;
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEngine.Events;
 [DefaultExecutionOrder(3)]
 public class TileMapGenerator : MonoBehaviour
 {
-    [SerializeField] public UnityEvent OnTileMapGenerate;
     [DoNotSerialize] public int[,] _tileMap;
     public void GenerateTileMap(RectInt dungeonBounds, List<DungeonGenerator.Room> rooms, List<DungeonGenerator.Room> doors)
     {
@@ -32,8 +30,6 @@ public class TileMapGenerator : MonoBehaviour
         }
 
         _tileMap = tileMap;
-
-        OnTileMapGenerate?.Invoke();
     }
     public string ToString(bool flip)
     {
