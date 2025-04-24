@@ -256,6 +256,7 @@ public class PathFinder : MonoBehaviour
         path.Reverse();
         return path;
     }
+    /*
     void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
@@ -291,4 +292,5 @@ public class PathFinder : MonoBehaviour
             }
         }
     }
+    */
 }

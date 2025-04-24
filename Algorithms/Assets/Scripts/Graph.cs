@@ -104,11 +104,7 @@ public class Graph<T>
     }
     public void Clear()
     {
-        List<T> list = KeysToList();
-        for (int i = list.Count - 1; i >= 0; i--)
-        {
-            list.RemoveAt(i);
-        }
+        adjacencyList.Clear();
     }
     public void PrintGraph()
     {
