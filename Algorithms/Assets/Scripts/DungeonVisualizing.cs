@@ -76,9 +76,10 @@ public class DungeonVisualizing : MonoBehaviour
     }
     private IEnumerator Generate(RectInt dungeonBounds)
     {
+        tileMapGenerator.GenerateTileMap(dungeonBounds, rooms.KeysToList(), doors.KeysToList());
+
         if (assetSpawningMethod == assetMethods.Good)
         {
-            tileMapGenerator.GenerateTileMap(dungeonBounds, rooms.KeysToList(), doors.KeysToList());
             StartCoroutine(SpawnWallsUsingTileMap(dungeonBounds));
             SpawnFloorUsingTileMap(dungeonBounds);
 
